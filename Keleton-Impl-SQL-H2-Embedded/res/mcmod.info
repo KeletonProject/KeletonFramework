@@ -1,0 +1,17 @@
+[{
+
+    "modid": "keleton-sql-h2",
+
+    "name": "keleton-sql-h2",
+
+    "version":  "1.0",
+
+    "description": "H2 SQL Implementation for Keleton Framework",
+
+    "authorList": [
+
+		"Kumonda221"
+
+    ]
+
+}]

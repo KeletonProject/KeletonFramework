@@ -1,0 +1,17 @@
+[{
+
+    "modid": "keleton-auth",
+
+    "name": "keleton-auth",
+
+    "version":  "1.0",
+
+    "description": "Auth system Implementation for Keleton Framework",
+
+    "authorList": [
+
+		"Kumonda221"
+
+    ]
+
+}]

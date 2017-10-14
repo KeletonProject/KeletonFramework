@@ -1,0 +1,17 @@
+[{
+
+    "modid": "keleton-config",
+
+    "name": "keleton-config",
+
+    "version":  "1.0",
+
+    "description": "Configuration Implementation for Keleton Framework",
+
+    "authorList": [
+
+		"Kumonda221"
+
+    ]
+
+}]
