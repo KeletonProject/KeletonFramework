@@ -2,7 +2,7 @@ package org.kucro3.keleton.auth;
 
 import java.util.UUID;
 
-import org.kucro3.keleton.Since;
+import org.kucro3.annotation.Since;
 import org.kucro3.keleton.UniqueService;
 import org.spongepowered.api.event.cause.Cause;
 

@@ -1,6 +1,6 @@
 package org.kucro3.keleton.auth;
 
-import org.kucro3.keleton.Since;
+import org.kucro3.annotation.Since;
 
 /**
  * 提供常用登陆结果的常量

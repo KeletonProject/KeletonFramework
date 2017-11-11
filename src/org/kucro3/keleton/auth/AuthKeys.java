@@ -1,6 +1,6 @@
 package org.kucro3.keleton.auth;
 
-import org.kucro3.keleton.Since;
+import org.kucro3.annotation.Since;
 import org.kucro3.keleton.keyring.Key;
 import org.kucro3.keleton.keyring.KeyToken;
 

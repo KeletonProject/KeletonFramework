@@ -1,6 +1,6 @@
 package org.kucro3.keleton.auth;
 
-import org.kucro3.keleton.Since;
+import org.kucro3.annotation.Since;
 
 /**
  * 登陆系统处理登陆事务时抛出的异常

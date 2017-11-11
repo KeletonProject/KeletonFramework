@@ -1,4 +1,4 @@
-package org.kucro3.keleton;
+package org.kucro3.annotation;
 
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;

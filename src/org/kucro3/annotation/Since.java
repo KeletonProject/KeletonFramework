@@ -1,4 +1,4 @@
-package org.kucro3.keleton;
+package org.kucro3.annotation;
 
 import java.lang.annotation.*;
 
