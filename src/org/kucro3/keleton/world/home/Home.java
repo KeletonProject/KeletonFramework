@@ -1,21 +1,27 @@
 package org.kucro3.keleton.world.home;
 
+import org.kucro3.annotation.CaseInsensitive;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface Home {
-    public String getName();
+    public @CaseInsensitive String getName();
 
-    public String getOwnerName();
+    public UUID getOwnerUniqueId();
 
     public default Optional<Player> getOwner()
     {
-        return Sponge.getServer().getPlayer(getOwnerName());
+        return Sponge.getServer().getPlayer(getOwnerUniqueId());
     }
 
     public Location<World> getLocation();
+
+    public boolean teleport(Entity entity, Cause cause);
 }

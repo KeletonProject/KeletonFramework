@@ -1,14 +1,16 @@
 package org.kucro3.keleton.world.home;
 
+import org.kucro3.annotation.CaseInsensitive;
+
 public interface HomeService {
     public static final String DEFAULT = "default";
 
-    public HomeCollection getCollection(String identifier);
+    public HomeCollection getCollection(@CaseInsensitive String identifier);
 
     public default HomeCollection getDefaultCollection()
     {
         return getCollection(DEFAULT);
     }
 
-    public boolean available(String identifier);
+    public boolean available(@CaseInsensitive String identifier);
 }
