@@ -7,8 +7,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 public interface HomeEvent extends ProceduralEvent {
-	public Player getPlayer();
-	
 	public String getName();
 	
 	public Location<World> getLocation();
