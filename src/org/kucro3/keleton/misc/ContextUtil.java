@@ -11,11 +11,11 @@ public class ContextUtil {
         Set<String> keySet = new HashSet<>();
         Set<Context> result = new HashSet<>();
 
-        for(String key : keys)
+        for (String key : keys)
             keySet.add(key);
 
-        for(Context context : contexts)
-            if(!keySet.contains(context.getKey()))
+        for (Context context : contexts)
+            if (!keySet.contains(context.getKey()))
                 result.add(context);
 
         return result;
