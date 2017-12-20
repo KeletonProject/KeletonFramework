@@ -1,6 +1,7 @@
 package org.kucro3.keleton.world.home;
 
 import org.kucro3.annotation.CaseInsensitive;
+import org.kucro3.keleton.world.home.exception.HomeException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -9,30 +10,30 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface HomeCollection {
-    public Optional<Home> getHome(@CaseInsensitive String name, World world);
+    public Optional<Home> getHome(@CaseInsensitive String name, World world) throws HomeException;
 
-    public boolean hasHome(@CaseInsensitive String name);
+    public boolean hasHome(@CaseInsensitive String name) throws HomeException;
 
-    public boolean hasHome(@CaseInsensitive String name, World world);
+    public boolean hasHome(@CaseInsensitive String name, World world) throws HomeException;
 
-    public boolean deleteHome(@CaseInsensitive String name);
+    public boolean deleteHome(@CaseInsensitive String name) throws HomeException;
 
-    public boolean deleteHome(@CaseInsensitive String name, World world);
+    public boolean deleteHome(@CaseInsensitive String name, World world) throws HomeException;
 
-    public boolean clearHomes();
+    public boolean clearHomes() throws HomeException;
 
-    public boolean clearHomes(World world);
+    public boolean clearHomes(World world) throws HomeException;
 
-    public Collection<Home> getAllHomes();
+    public Collection<Home> getAllHomes() throws HomeException;
 
-    public Collection<Home> getHomes(World world);
+    public Collection<Home> getHomes(World world) throws HomeException;
 
-    public Collection<Home> getHomes(String name);
+    public Collection<Home> getHomes(String name) throws HomeException;
 
-    public default int homeCount()
+    public default int homeCount() throws HomeException
     {
         return getAllHomes().size();
     }
 
-    public Home setHome(UUID owner, @CaseInsensitive String name, Location<World> location);
+    public Home setHome(UUID owner, @CaseInsensitive String name, Location<World> location) throws HomeException;
 }
