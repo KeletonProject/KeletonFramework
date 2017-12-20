@@ -9,15 +9,25 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface HomeCollection {
-    public Optional<Home> getHome(@CaseInsensitive String name);
+    public Optional<Home> getHome(@CaseInsensitive String name, World world);
 
     public boolean hasHome(@CaseInsensitive String name);
 
+    public boolean hasHome(@CaseInsensitive String name, World world);
+
     public boolean deleteHome(@CaseInsensitive String name);
+
+    public boolean deleteHome(@CaseInsensitive String name, World world);
 
     public boolean clearHomes();
 
+    public boolean clearHomes(World world);
+
     public Collection<Home> getAllHomes();
+
+    public Collection<Home> getHomes(World world);
+
+    public Collection<Home> getHomes(String name);
 
     public default int homeCount()
     {

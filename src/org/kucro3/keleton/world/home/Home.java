@@ -22,6 +22,8 @@ public interface Home extends Located {
         return Sponge.getServer().getPlayer(getOwnerUniqueId());
     }
 
+    public boolean vaild();
+
     public Location<World> getLocation();
 
     public boolean teleport(Entity entity, Cause cause);
