@@ -29,5 +29,7 @@ public interface Home extends Located {
 
     public Location<World> getLocation() throws HomeException;
 
+    public HomeCollection getCollection();
+
     public boolean teleport(Entity entity, Cause cause) throws HomeException;
 }
