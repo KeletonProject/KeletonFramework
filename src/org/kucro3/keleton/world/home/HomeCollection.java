@@ -2,6 +2,7 @@ package org.kucro3.keleton.world.home;
 
 import org.kucro3.annotation.CaseInsensitive;
 import org.kucro3.keleton.world.home.exception.HomeException;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -16,13 +17,13 @@ public interface HomeCollection {
 
     public boolean hasHome(UUID owner, @CaseInsensitive String name, World world) throws HomeException;
 
-    public boolean deleteHome(UUID owner, @CaseInsensitive String name) throws HomeException;
+    public boolean deleteHome(UUID owner, @CaseInsensitive String name, Cause cause) throws HomeException;
 
-    public boolean clearHomes() throws HomeException;
+    public boolean clearHomes(Cause cause) throws HomeException;
 
-    public boolean clearHomes(World world) throws HomeException;
+    public boolean clearHomes(World world, Cause cause) throws HomeException;
 
-    public boolean clearHomes(UUID owner) throws HomeException;
+    public boolean clearHomes(UUID owner, Cause cause) throws HomeException;
 
     public Collection<Home> getAllHomes() throws HomeException;
 
@@ -40,5 +41,5 @@ public interface HomeCollection {
         return getHomes(owner).size();
     }
 
-    public Home setHome(UUID owner, @CaseInsensitive String name, Location<World> location) throws HomeException;
+    public Home setHome(UUID owner, @CaseInsensitive String name, Location<World> location, Cause cause) throws HomeException;
 }
