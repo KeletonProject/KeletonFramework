@@ -25,16 +25,7 @@ public interface HomeCollection {
 
     public boolean clearHomes(UUID owner, Cause cause) throws HomeException;
 
-    public Collection<Home> getAllHomes() throws HomeException;
-
-    public Collection<Home> getHomes(World world) throws HomeException;
-
     public Collection<Home> getHomes(UUID owner) throws HomeException;
-
-    public default int homeCount() throws HomeException
-    {
-        return getAllHomes().size();
-    }
 
     public default int homeCount(UUID owner) throws HomeException
     {
