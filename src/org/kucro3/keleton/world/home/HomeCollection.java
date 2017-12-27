@@ -24,6 +24,8 @@ public interface HomeCollection {
 
     public CompletableFuture<Boolean> deleteHome(UUID owner, @CaseInsensitive String name, Cause cause) throws HomeException;
 
+    public CompletableFuture<Boolean> deleteHome(UUID owner, @CaseInsensitive String name, World world, Cause cause) throws HomeException;
+
     public CompletableFuture<Boolean> clearHomes(Cause cause) throws HomeException;
 
     public CompletableFuture<Boolean> clearHomes(World world, Cause cause) throws HomeException;
