@@ -1,5 +1,7 @@
 package org.kucro3.keleton;
 
+import org.kucro3.keleton.implementation.loader.KeletonModuleContainer;
+
 /**
  * 由此获取一些关于Keleton框架的基本信息
  * 
@@ -24,4 +26,11 @@ public class Keleton {
 	{
 		return 0;
 	}
+
+	public static KeletonModuleContainer getModuleContainer()
+	{
+		return container;
+	}
+
+	private static final KeletonModuleContainer container = new KeletonModuleContainer();
 }
