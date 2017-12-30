@@ -1,7 +1,6 @@
 package org.kucro3.keleton.implementation.loader;
 
-import org.kucro3.keleton.implementation.KeletonInstance;
-import org.kucro3.keleton.implementation.KeletonModule;
+import org.kucro3.keleton.implementation.KeletonLoadedModule;
 import org.kucro3.keleton.implementation.event.KeletonModuleEvent;
 import org.spongepowered.api.event.cause.Cause;
 

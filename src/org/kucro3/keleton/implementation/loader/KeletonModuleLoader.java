@@ -1,6 +1,7 @@
 package org.kucro3.keleton.implementation.loader;
 
 import org.kucro3.keleton.implementation.KeletonInstance;
+import org.kucro3.keleton.implementation.KeletonLoadedModule;
 import org.kucro3.keleton.implementation.KeletonModule;
 import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
 import org.spongepowered.api.Sponge;
@@ -39,7 +40,7 @@ public final class KeletonModuleLoader {
                 continue;
             }
 
-            KeletonLoadedModule loaded = new KeletonLoadedModule(info, instance);
+            KeletonLoadedModule loaded = new KeletonLoadedModuleImpl(info, instance);
 
             try {
                 container.addModule(info.name(), loaded);

@@ -1,5 +1,6 @@
 package org.kucro3.keleton.implementation.loader;
 
+import org.kucro3.keleton.implementation.KeletonLoadedModule;
 import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
 
 import java.util.*;
@@ -40,7 +41,7 @@ public class KeletonModuleContainer {
             throw new KeletonLoaderException("Duplicated module: " + name);
 
         map.put(name, module);
-        deps.put(name, new HashSet<>(Arrays.asList(module.getModule().dependencies())));
+        deps.put(name, new HashSet<>(Arrays.asList(module.getInfo().dependencies())));
     }
 
     public Collection<KeletonLoadedModule> getModules()

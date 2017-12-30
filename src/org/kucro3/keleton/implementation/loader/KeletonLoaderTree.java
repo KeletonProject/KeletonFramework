@@ -1,5 +1,6 @@
 package org.kucro3.keleton.implementation.loader;
 
+import org.kucro3.keleton.implementation.KeletonLoadedModule;
 import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
 
 import java.util.*;
@@ -14,8 +15,8 @@ class KeletonLoaderTree {
         Set<String> deps;
         for(KeletonLoadedModule module : modules)
         {
-            this.modules.put(module.getModule().name(), module);
-            this.dependcies.put(module.getModule().name(), deps = new HashSet<>(Arrays.asList(module.getModule().dependencies())));
+            this.modules.put(module.getInfo().name(), module);
+            this.dependcies.put(module.getInfo().name(), deps = new HashSet<>(Arrays.asList(module.getInfo().dependencies())));
             if(deps.isEmpty())
                 new Node(module).linkAfter(tail);
         }
@@ -32,19 +33,19 @@ class KeletonLoaderTree {
     void compute() throws KeletonLoaderException
     {
         for(KeletonLoadedModule module : this.modules.values())
-            compute(module, dependcies.get(module.getModule().name()));
+            compute(module, dependcies.get(module.getInfo().name()));
     }
 
     void compute(KeletonLoadedModule from, Set<String> deps) throws KeletonLoaderException
     {
-        if(mapped.containsKey(from.getModule().name()))
+        if(mapped.containsKey(from.getInfo().name()))
             return;
 
         Node last = head;
 
         for(String dep : deps)
         {
-            if(dependcies.get(dep).contains(from.getModule().name()))
+            if(dependcies.get(dep).contains(from.getInfo().name()))
                 throw new KeletonLoaderException("Dependency loop detected");
 
             Node n = mapped.get(dep);
@@ -113,7 +114,7 @@ class KeletonLoaderTree {
             if(next != null)
                 next.prev = prev;
 
-            mapped.remove(module.getModule().name());
+            mapped.remove(module.getInfo().name());
 
             next = null;
             prev = null;
