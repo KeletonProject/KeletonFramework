@@ -25,6 +25,7 @@ public class KeletonModuleContainer {
             if(deps.contains(name))
                 return false;
 
+        tree.remove(name);
         return map.remove(name) != null;
     }
 

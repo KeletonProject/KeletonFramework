@@ -24,6 +24,11 @@ class KeletonLoaderTree {
             throw new KeletonLoaderException("Missing framework? Root dependency not found");
     }
 
+    void remove(String name)
+    {
+        Optional.ofNullable(mapped.remove(name)).ifPresent((n) -> n.remove());
+    }
+
     void compute() throws KeletonLoaderException
     {
         for(KeletonLoadedModule module : this.modules.values())
@@ -98,6 +103,21 @@ class KeletonLoaderTree {
         Node(KeletonLoadedModule module)
         {
             this.module = module;
+        }
+
+        void remove()
+        {
+            if(prev != null)
+                prev.next = next;
+
+            if(next != null)
+                next.prev = prev;
+
+            mapped.remove(module.getModule().name());
+
+            next = null;
+            prev = null;
+            module = null;
         }
 
         void linkAfter(Node node)
