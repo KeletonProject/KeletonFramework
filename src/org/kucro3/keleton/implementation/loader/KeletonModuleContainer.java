@@ -5,6 +5,7 @@ import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class KeletonModuleContainer {
     public KeletonModuleContainer()
@@ -34,12 +35,29 @@ public class KeletonModuleContainer {
         map.put(name, module);
     }
 
+    void compute() throws KeletonLoaderException
+    {
+        tree = new KeletonLoaderTree(map.values());
+        tree.compute();
+
+        pipeline = tree.build();
+    }
+
+    KeletonLoaderPipeline getPipeline()
+    {
+        return pipeline;
+    }
+
     KeletonLoaderTree getTree()
     {
         return tree;
     }
 
-    private final KeletonLoaderTree tree = new KeletonLoaderTree();
+    KeletonLoaderPipeline pipeline;
+
+    private KeletonLoaderTree tree;
+
+    private final Map<String, Set<String>> deps = new HashMap<>();
 
     private final Map<String, KeletonLoadedModule> map = new HashMap<>();
 }

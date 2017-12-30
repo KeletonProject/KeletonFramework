@@ -12,7 +12,7 @@ class KeletonLoaderTree {
         this.modules = new HashMap<>();
 
         Set<String> deps;
-        for(KeletonLoadedModule module: modules)
+        for(KeletonLoadedModule module : modules)
         {
             this.modules.put(module.getModule().name(), module);
             this.dependcies.put(module.getModule().name(), deps = new HashSet<>(Arrays.asList(module.getModule().dependencies())));
@@ -22,6 +22,12 @@ class KeletonLoaderTree {
 
         if(head == null)
             throw new KeletonLoaderException("Missing framework? Root dependency not found");
+    }
+
+    void compute() throws KeletonLoaderException
+    {
+        for(KeletonLoadedModule module : this.modules.values())
+            compute(module, dependcies.get(module.getModule().name()));
     }
 
     void compute(KeletonLoadedModule from, Set<String> deps) throws KeletonLoaderException
