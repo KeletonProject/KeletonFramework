@@ -21,12 +21,12 @@ public class KeletonModuleContainer {
         return map.containsKey(name);
     }
 
-    boolean removeModule(String name)
+    public boolean removeModule(String name)
     {
         return map.remove(name) != null;
     }
 
-    void addModule(String name, KeletonLoadedModule module) throws KeletonLoaderException
+    public void addModule(String name, KeletonLoadedModule module) throws KeletonLoaderException
     {
         if(map.containsKey(name))
             throw new KeletonLoaderException("Duplicated module: " + name);

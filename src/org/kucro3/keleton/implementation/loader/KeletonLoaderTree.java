@@ -1,16 +1,83 @@
 package org.kucro3.keleton.implementation.loader;
 
-import com.sun.media.sound.RIFFInvalidDataException;
+import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 class KeletonLoaderTree {
-    KeletonLoaderTree()
+    KeletonLoaderTree(Collection<KeletonLoadedModule> modules) throws KeletonLoaderException
     {
+        this.dependcies = new HashMap<>();
+        this.mapped = new HashMap<>();
+        this.modules = new HashMap<>();
+
+        Set<String> deps;
+        for(KeletonLoadedModule module: modules)
+        {
+            this.modules.put(module.getModule().name(), module);
+            this.dependcies.put(module.getModule().name(), deps = new HashSet<>(Arrays.asList(module.getModule().dependencies())));
+            if(deps.isEmpty())
+                new Node(module).linkAfter(tail);
+        }
+
+        if(head == null)
+            throw new KeletonLoaderException("Missing framework? Root dependency not found");
     }
 
-    private Map<String, Node> mapped = new HashMap<>();
+    void compute(KeletonLoadedModule from, Set<String> deps) throws KeletonLoaderException
+    {
+        if(mapped.containsKey(from.getModule().name()))
+            return;
+
+        Node last = head;
+
+        for(String dep : deps)
+        {
+            if(dependcies.get(dep).contains(from.getModule().name()))
+                throw new KeletonLoaderException("Dependency loop detected");
+
+            Node n = mapped.get(dep);
+
+            if (n != null)
+                last = max(last, n);
+            else
+            {
+                KeletonLoadedModule module = modules.get(dep);
+                Set<String> mdeps = dependcies.get(dep);
+                compute(module, mdeps);
+            }
+        }
+
+        modCount++;
+        new Node(from).linkAfter(last);
+    }
+
+    KeletonLoaderPipeline build()
+    {
+        ArrayList<KeletonLoadedModule> modules = new ArrayList<>(this.modules.size());
+
+        Node n = head;
+        while(n != null)
+        {
+            modules.add(n.module);
+            n = n.next;
+        }
+
+        return new KeletonLoaderPipeline(modules);
+    }
+
+    static Node max(Node a, Node b)
+    {
+        if(b.index.get() > a.index.get())
+            return b;
+        return a;
+    }
+
+    private final Map<String, KeletonLoadedModule> modules;
+
+    private final Map<String, Set<String>> dependcies;
+
+    private final Map<String, Node> mapped;
 
     private Node head;
 
@@ -18,29 +85,13 @@ class KeletonLoaderTree {
 
     private int modCount;
 
+    private int size;
+
     class Node
     {
         Node(KeletonLoadedModule module)
         {
             this.module = module;
-        }
-
-        void remove()
-        {
-            if(prev != null)
-                prev.next = next;
-
-            if(next != null)
-            {
-                next.prev = prev;
-                next.index.index = prev == null ? new RelatedIndex(new FixedIndex(0)) : prev.index;
-            }
-
-            mapped.remove(module.getModule().name());
-
-            next = null;
-            prev = null;
-            module = null;
         }
 
         void linkAfter(Node node)
@@ -67,34 +118,8 @@ class KeletonLoaderTree {
                 next = node.next;
                 node.next = this;
             }
-        }
 
-        void linkBefore(Node node)
-        {
-            if(head == null)
-                head = this;
-
-            if(node == null)
-            {
-                tail = this;
-                index = new RelatedIndex(new FixedIndex(0));
-            }
-            else
-            {
-                if(node.prev != null)
-                {
-                    index = new RelatedIndex(node.prev.index);
-                    node.prev.next = this;
-                }
-                else
-                    index = new RelatedIndex(new FixedIndex(0));
-
-                node.index.index = index;
-
-                prev = node.prev;
-                next = node;
-                node.prev = this;
-            }
+            size++;
         }
 
         RelatedIndex index;
