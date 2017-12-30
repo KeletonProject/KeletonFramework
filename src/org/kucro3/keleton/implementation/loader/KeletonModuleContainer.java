@@ -25,8 +25,13 @@ public class KeletonModuleContainer {
             if(deps.contains(name))
                 return false;
 
+        KeletonLoadedModule module = map.remove(name);
+        if(module == null)
+            return false;
+
         tree.remove(name);
-        return map.remove(name) != null;
+
+        return true;
     }
 
     public void addModule(String name, KeletonLoadedModule module) throws KeletonLoaderException
@@ -41,6 +46,26 @@ public class KeletonModuleContainer {
     public Collection<KeletonLoadedModule> getModules()
     {
         return Collections.unmodifiableCollection(map.values());
+    }
+
+    public boolean hasDepended(String name)
+    {
+        for(Set<String> deps : this.deps.values())
+            if(deps.contains(name))
+                return true;
+
+        return false;
+    }
+
+    public Collection<KeletonLoadedModule> getDepended(String name)
+    {
+        ArrayList<KeletonLoadedModule> array = new ArrayList<>();
+
+        for(Map.Entry<String, Set<String>> deps : this.deps.entrySet())
+            if(deps.getValue().contains(name))
+                array.add(map.get(deps.getKey()));
+
+        return array;
     }
 
     void compute() throws KeletonLoaderException
