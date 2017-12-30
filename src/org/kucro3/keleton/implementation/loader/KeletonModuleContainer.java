@@ -2,10 +2,7 @@ package org.kucro3.keleton.implementation.loader;
 
 import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class KeletonModuleContainer {
     public KeletonModuleContainer()
@@ -24,6 +21,10 @@ public class KeletonModuleContainer {
 
     public boolean removeModule(String name)
     {
+        for(Set<String> deps : this.deps.values())
+            if(deps.contains(name))
+                return false;
+
         return map.remove(name) != null;
     }
 
@@ -33,6 +34,12 @@ public class KeletonModuleContainer {
             throw new KeletonLoaderException("Duplicated module: " + name);
 
         map.put(name, module);
+        deps.put(name, new HashSet<>(Arrays.asList(module.getModule().dependencies())));
+    }
+
+    public Collection<KeletonLoadedModule> getModules()
+    {
+        return Collections.unmodifiableCollection(map.values());
     }
 
     void compute() throws KeletonLoaderException
