@@ -7,6 +7,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.lib.Type;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -33,7 +34,9 @@ public final class KeletonModuleLoader {
             Object instance = optional.get();
 
             Class<?> clz = instance.getClass();
-            KeletonModule info = clz.getAnnotation(KeletonModule.class);
+
+            // KeletonModule info = clz.getAnnotation(KeletonModule.class); // ClassDefNotFound caused by wrapped launcher
+            KeletonModule info = getKeletonModule(clz);
 
             if(info == null)
                 continue;
@@ -47,7 +50,7 @@ public final class KeletonModuleLoader {
             {
                 boolean flag0, flag1, flag2;
 
-                if(flag0 = method.getAnnotation(InvokeOnLoad.class) != null)
+                if(flag0 = getInvokeOnLoad(method) != null)
                     if(onLoad != null)
                     {
                         consumer.accept(instance, new KeletonLoaderException("Duplicated onLoad function"));
@@ -55,7 +58,7 @@ public final class KeletonModuleLoader {
                     }
                     else
                         onLoad = method;
-                if(flag1 = method.getAnnotation(InvokeOnEnable.class) != null)
+                if(flag1 = getInvokeOnEnable(method) != null)
                 {
                     if(flag0)
                     {
@@ -65,7 +68,7 @@ public final class KeletonModuleLoader {
                     else
                         onEnable = method;
                 }
-                if(flag2 = method.getAnnotation(InvokeOnDisable.class) != null)
+                if(flag2 = getInvokeOnEnable(method) != null)
                 {
                     if(flag0 || flag1)
                     {
@@ -93,5 +96,33 @@ public final class KeletonModuleLoader {
                 consumer.accept(instance, e);
             }
         }
+    }
+
+    static Annotation getAnnotation(AnnotatedElement at, String classname)
+    {
+        for(Annotation anno : at.getAnnotations())
+            if(anno.annotationType().getCanonicalName().equals(classname))
+                return anno;
+        return null;
+    }
+
+    static InvokeOnLoad getInvokeOnLoad(AnnotatedElement at)
+    {
+        return (InvokeOnLoad) getAnnotation(at, "org.kucro3.keleton.implementation.InvokeOnLoad");
+    }
+
+    static InvokeOnEnable getInvokeOnEnable(AnnotatedElement at)
+    {
+        return (InvokeOnEnable) getAnnotation(at, "org.kucro3.keleton.implementation.InvokeOnEnable");
+    }
+
+    static InvokeOnDisable getInvokeOnDisable(AnnotatedElement at)
+    {
+        return (InvokeOnDisable) getAnnotation(at, "org.kucro3.keleton.implementation.InvokeOnDisable");
+    }
+
+    static KeletonModule getKeletonModule(AnnotatedElement at)
+    {
+        return (KeletonModule) getAnnotation(at, "org.kucro3.keleton.implementation.KeletonModule");
     }
 }
