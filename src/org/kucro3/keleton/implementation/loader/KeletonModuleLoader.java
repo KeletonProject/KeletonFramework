@@ -3,6 +3,7 @@ package org.kucro3.keleton.implementation.loader;
 import org.kucro3.keleton.implementation.KeletonInstance;
 import org.kucro3.keleton.implementation.KeletonLoadedModule;
 import org.kucro3.keleton.implementation.KeletonModule;
+import org.kucro3.keleton.implementation.KeletonModuleManager;
 import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -13,6 +14,11 @@ import java.util.function.BiConsumer;
 public final class KeletonModuleLoader {
     private KeletonModuleLoader()
     {
+    }
+
+    public static void load(KeletonModuleManagerImpl manager, BiConsumer<KeletonInstance, KeletonLoaderException> consumer)
+    {
+        load(manager.container, consumer);
     }
 
     public static void load(KeletonModuleContainer container, BiConsumer<KeletonInstance, KeletonLoaderException> consumer)

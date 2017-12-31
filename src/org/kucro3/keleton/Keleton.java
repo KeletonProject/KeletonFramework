@@ -34,5 +34,5 @@ public class Keleton {
 		return manager;
 	}
 
-	private static final KeletonModuleManager manager = new KeletonModuleManagerImpl();
+	static KeletonModuleManager manager;
 }
