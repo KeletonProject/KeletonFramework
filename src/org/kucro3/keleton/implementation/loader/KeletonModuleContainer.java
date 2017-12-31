@@ -2,6 +2,7 @@ package org.kucro3.keleton.implementation.loader;
 
 import org.kucro3.keleton.implementation.KeletonLoadedModule;
 import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
+import org.spongepowered.api.Sponge;
 
 import java.util.*;
 
@@ -18,21 +19,6 @@ public class KeletonModuleContainer {
     public boolean hasModule(String name)
     {
         return map.containsKey(name);
-    }
-
-    public boolean removeModule(String name)
-    {
-        for(Set<String> deps : this.deps.values())
-            if(deps.contains(name))
-                return false;
-
-        KeletonLoadedModule module = map.remove(name);
-        if(module == null)
-            return false;
-
-        tree.remove(name);
-
-        return true;
     }
 
     public void addModule(String name, KeletonLoadedModule module) throws KeletonLoaderException
