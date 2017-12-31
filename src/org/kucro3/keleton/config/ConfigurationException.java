@@ -1,8 +1,10 @@
 package org.kucro3.keleton.config;
 
+import org.kucro3.keleton.exception.KeletonException;
+
 import java.io.IOException;
 
-public class ConfigurationException extends Exception {
+public class ConfigurationException extends KeletonException {
 
 	/**
 	 * 

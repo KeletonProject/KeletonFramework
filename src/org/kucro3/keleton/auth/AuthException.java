@@ -1,6 +1,7 @@
 package org.kucro3.keleton.auth;
 
 import org.kucro3.annotation.Since;
+import org.kucro3.keleton.exception.KeletonException;
 
 /**
  * 登陆系统处理登陆事务时抛出的异常
@@ -8,7 +9,7 @@ import org.kucro3.annotation.Since;
  * 
  */
 @Since(majorVersion = 1, minorVersion = 0)
-public class AuthException extends Exception {
+public class AuthException extends KeletonException {
 
 	/**
 	 * 

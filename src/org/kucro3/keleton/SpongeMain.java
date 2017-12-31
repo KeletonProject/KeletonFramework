@@ -10,14 +10,15 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
+import java.util.ArrayList;
+
 @Plugin(id = "keletonframework",
         name = "keletonframework",
         version = "1.0",
         description = "Keleton Framework",
         authors = "Kumonda221")
-@KeletonModule(name = "keletonframework",
-               dependencies = {"keleton-utility"})
-public class SpongeMain extends KeletonInstance {
+@KeletonModule(name = "keletonframework")
+public class SpongeMain {
     @Inject
     public SpongeMain(Logger logger)
     {
