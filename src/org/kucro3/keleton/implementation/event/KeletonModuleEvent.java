@@ -1,10 +1,10 @@
 package org.kucro3.keleton.implementation.event;
 
-import org.kucro3.keleton.implementation.KeletonLoadedModule;
+import org.kucro3.keleton.implementation.KeletonModule;
 import org.spongepowered.api.event.Event;
 
 public interface KeletonModuleEvent extends Event {
-    public KeletonLoadedModule getModule();
+    public KeletonModule getModule();
 
     public interface Enable extends KeletonModuleEvent
     {
