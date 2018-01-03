@@ -7,7 +7,7 @@ public interface KeletonModuleManager {
 
     public boolean hasDepended(String name);
 
-    public Collection<KeletonLoadedModule> getDepended(String name);
+    public Collection<KeletonModule> getDepended(String name);
 
-    public Collection<KeletonLoadedModule> getModules();
+    public Collection<KeletonModule> getModules();
 }
