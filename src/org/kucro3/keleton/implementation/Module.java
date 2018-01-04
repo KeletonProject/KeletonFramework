@@ -11,4 +11,6 @@ public @interface Module {
     public String id();
 
     public String[] dependencies() default {};
+
+    public boolean supportDisabling() default false;
 }
