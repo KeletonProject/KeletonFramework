@@ -3,6 +3,9 @@ package org.kucro3.keleton.implementation.loader;
 import org.kucro3.keleton.implementation.KeletonInstance;
 import org.kucro3.keleton.implementation.KeletonModule;
 import org.kucro3.keleton.implementation.Module;
+import org.kucro3.keleton.implementation.exception.KeletonModuleException;
+import org.kucro3.keleton.implementation.exception.KeletonModuleExecutionException;
+import org.kucro3.keleton.implementation.exception.KeletonModuleFunctionException;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -46,17 +49,85 @@ public class KeletonModuleImpl implements KeletonModule {
         return state;
     }
 
-    boolean shiftState(State state)
+    @Override
+    public void load() throws KeletonModuleException
+    {
+        checkConvert(State.LOADED);
+
+        try {
+            instance.onLoad();
+        } catch (Exception e) {
+            throw new KeletonModuleExecutionException(e);
+        }
+
+        this.state = State.LOADED;
+    }
+
+    @Override
+    public void enable() throws KeletonModuleException
+    {
+        checkConvert(State.ENABLED);
+
+        try {
+             instance.onEnable();
+        } catch (Exception e) {
+            throw new KeletonModuleExecutionException(e);
+        }
+
+        this.state = State.ENABLED;
+    }
+
+    @Override
+    public void disable() throws KeletonModuleException
+    {
+        checkDisablingFunction();
+        checkConvert(State.DISABLED);
+
+        callback.onDisable(this);
+
+        try {
+            instance.onDisable();
+        } catch (Exception e) {
+            throw new KeletonModuleExecutionException(e);
+        }
+
+        this.state = State.DISABLED;
+    }
+
+    void checkDisablingFunction() throws KeletonModuleException
+    {
+        if(!supportDisabling())
+            throw new KeletonModuleFunctionException("Disabling operation not supported");
+    }
+
+    boolean touchState(State state)
     {
         if((this.state.ordinal() + 1 % 3) != state.ordinal())
             return false;
-        this.state = state;
         return true;
     }
+
+    void checkConvert(State state) throws KeletonModuleException
+    {
+        if(!touchState(state))
+            stateFailure(state);
+    }
+
+    void stateFailure(State state) throws KeletonModuleException
+    {
+        throw new KeletonModuleFunctionException("Cannot convert the current state " + this.state.name() + " to " + state.name());
+    }
+
+    DisablingCallback callback;
 
     private State state;
 
     private final KeletonInstance instance;
 
     private final Module info;
+
+    static interface DisablingCallback
+    {
+        void onDisable(KeletonModuleImpl module) throws KeletonModuleException;
+    }
 }
