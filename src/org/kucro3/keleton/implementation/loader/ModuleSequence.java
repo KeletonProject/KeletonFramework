@@ -7,7 +7,7 @@ import org.kucro3.keleton.implementation.exception.KeletonModuleFunctionExceptio
 import java.util.*;
 
 public class ModuleSequence {
-    ModuleSequence(Collection<KeletonModuleImpl> modules)
+    ModuleSequence(Collection<KeletonModuleImpl> modules) throws KeletonLoaderException
     {
         this.modules = new HashMap<>();
         this.dependencies = new HashMap<>();
@@ -31,6 +31,8 @@ public class ModuleSequence {
                 dmds.add(impl.getId());
             }
         }
+
+        this.sequence = computeSequence();
     }
 
     private ModuleSequence(Map<String, Set<String>> demanders,
@@ -40,6 +42,7 @@ public class ModuleSequence {
         this.demanders = new HashMap<>(demanders);
         this.dependencies = new HashMap<>(dependencies);
         this.modules = new HashMap<>(modules);
+        this.sequence = null;
     }
 
     void checkDepended(KeletonModuleImpl impl) throws KeletonModuleException
@@ -104,6 +107,18 @@ public class ModuleSequence {
 
         return result;
     }
+
+    KeletonModuleImpl getModule(String id)
+    {
+        return modules.get(id);
+    }
+
+    boolean hasModule(String id)
+    {
+        return modules.containsKey(id);
+    }
+
+    private final List<KeletonModuleImpl> sequence;
 
     private final Map<String, Set<String>> demanders;
 
