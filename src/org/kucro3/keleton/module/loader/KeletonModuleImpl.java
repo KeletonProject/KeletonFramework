@@ -82,14 +82,34 @@ public class KeletonModuleImpl implements KeletonModule {
         postTransformed();
     }
 
+    @Override
+    public void escapeState(State state)
+    {
+        while(this.state.equals(state));
+    }
+
+    @Override
+    public boolean waitForDependencies()
+    {
+        if(!isBound())
+            return false;
+
+        for(String dep : getDependencies())
+            seq.getModule(dep).escapeFence();
+
+        return true;
+    }
+
     Optional<CompletableFuture<Void>> transform(State to, ActionFunction function, Supplier<Boolean> checker)
     {
-        if(!checker.get() || !checkConvert(to) || !prepostTransformation(to))
+        if(!checkBind() || !checker.get() || !checkConvert(to) || !prepostTransformation(to))
             return Optional.empty();
 
         fence();
 
         try {
+            waitForDependencies();
+
             CompletableFuture<Void> future = function.get();
 
             future.exceptionally((e) -> exceptionally(e, to));
@@ -256,6 +276,19 @@ public class KeletonModuleImpl implements KeletonModule {
     Cause createCause()
     {
         return Cause.source(this).build();
+    }
+
+    boolean isBound()
+    {
+        return this.seq != null;
+    }
+
+    boolean checkBind()
+    {
+        boolean result = isBound();
+        if(!result)
+            Sponge.getEventManager().post(new StateTransformationEventImpl.Ignored(this, this.state, state, createCause(), "Not binded"));
+        return result;
     }
 
     void bind(ModuleSequence seq) throws KeletonModuleException

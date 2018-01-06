@@ -129,6 +129,24 @@ abstract class StateTransformationEventImpl implements KeletonModuleEvent.StateT
         private final Throwable exception;
     }
 
+    static class BadDependency extends StateTransformationEventImpl implements KeletonModuleEvent.StateTransformation.BadDependency
+    {
+
+        BadDependency(KeletonModule module, KeletonModule.State from, KeletonModule.State to, Cause cause, KeletonModule dep)
+        {
+            super(module, from, to, cause);
+            this.dep = dep;
+        }
+
+        @Override
+        public KeletonModule getDependency()
+        {
+            return dep;
+        }
+
+        private final KeletonModule dep;
+    }
+
     private final Cause cause;
 
     private final KeletonModule.State from;

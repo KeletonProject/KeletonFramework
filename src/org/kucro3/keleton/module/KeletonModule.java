@@ -23,6 +23,15 @@ public interface KeletonModule {
 
     public Optional<CompletableFuture<Void>> destroy();
 
+    public boolean waitForDependencies();
+
+    public default void escapeFence()
+    {
+        escapeState(State.FENCED);
+    }
+
+    public void escapeState(State state);
+
     enum State {
         MOUNTED(0x00),
         LOADED(0x01),

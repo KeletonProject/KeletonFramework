@@ -36,6 +36,11 @@ public interface KeletonModuleEvent extends ProceduralEvent {
         public interface Transformed extends StateTransformation, ProceduralEvent.Completed
         {
         }
+
+        public interface BadDependency extends StateTransformation, ProceduralEvent.Failed
+        {
+            public KeletonModule getDependency();
+        }
     }
 
     public interface Recovery extends KeletonModuleEvent, ProceduralEvent
