@@ -65,8 +65,10 @@ public class KeletonModuleImpl implements KeletonModule {
                 return null;
             if(!this.instance.tryRecovery(this, expected, e))
                 postFailedOnRecovery(e, expected, null);
-            else
+            else {
+                this.state = expected;
                 postRecovered(e, expected, expected);
+            }
         } catch (Throwable recoveryException) {
             this.state = State.FAILED;
             postFailedOnRecovery(e, expected, recoveryException);
@@ -194,13 +196,45 @@ public class KeletonModuleImpl implements KeletonModule {
 
     boolean touchState(State state)
     {
-        if(this.state.equals(State.FENCED))
-            return false;
+        switch(this.state)
+        {
+            case FENCED:
+                return false;
 
-        int expected = state.code();
-        int prediction = this.state.code() << 1;
+            case MOUNTED:
+            case DESTROYED:
+            case FAILED:
+                switch(state)
+                {
+                    case LOADED:
+                        return true;
 
+                    default:
+                        return false;
+                }
 
+            case LOADED:
+            case DISABLED:
+                switch(state)
+                {
+                    case ENABLED:
+                    case DESTROYED:
+                        return true;
+
+                    default:
+                        return false;
+                }
+
+            case ENABLED:
+                switch(state)
+                {
+                    case DISABLED:
+                        return true;
+
+                    default:
+                        return false;
+                }
+        }
 
         return true;
     }
