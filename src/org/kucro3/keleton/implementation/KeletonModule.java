@@ -15,15 +15,31 @@ public interface KeletonModule {
 
     public State getState();
 
-    public void load() throws KeletonModuleException;
+    public void load();
 
-    public void enable() throws KeletonModuleException;
+    public void enable();
 
-    public void disable() throws KeletonModuleException;
+    public void disable();
 
     enum State {
-        LOADED,
-        ENABLED,
-        DISABLED
+        MOUNTED(0x00),
+        LOADED(0x01),
+        ENABLED(0x02),
+        DISABLED(0x04),
+        DESTROYED(0x08),
+        FENCED(0x10),
+        FAILED(0x20);
+
+        private State(int code)
+        {
+            this.code = code;
+        }
+
+        public int code()
+        {
+            return code;
+        }
+
+        private final int code;
     }
 }

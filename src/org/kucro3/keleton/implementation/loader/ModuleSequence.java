@@ -1,5 +1,6 @@
 package org.kucro3.keleton.implementation.loader;
 
+import org.kucro3.keleton.implementation.KeletonModule;
 import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
 import org.kucro3.keleton.implementation.exception.KeletonModuleException;
 import org.kucro3.keleton.implementation.exception.KeletonModuleFunctionException;
@@ -15,7 +16,7 @@ public class ModuleSequence {
 
         for(KeletonModuleImpl impl : modules)
         {
-            impl.callback = this::checkDepended;
+            impl.callback = this::checkDependedAndRemove;
 
             this.modules.put(impl.getId(), impl);
 
@@ -32,6 +33,7 @@ public class ModuleSequence {
             }
         }
 
+        this.failedOnLoad = new HashSet<>();
         this.sequence = computeSequence();
     }
 
@@ -43,9 +45,10 @@ public class ModuleSequence {
         this.dependencies = new HashMap<>(dependencies);
         this.modules = new HashMap<>(modules);
         this.sequence = null;
+        this.failedOnLoad = null;
     }
 
-    void checkDepended(KeletonModuleImpl impl) throws KeletonModuleException
+    void checkDependedAndRemove(KeletonModuleImpl impl) throws KeletonModuleException
     {
         if(hasDependencies(impl.getId()))
             throw new KeletonModuleFunctionException("Module \"" + impl.getId() + "\" is in use and cannot be removed safely");
@@ -108,6 +111,34 @@ public class ModuleSequence {
         return result;
     }
 
+    void loadAll()
+    {
+        failedOnLoad.clear();
+
+        for(KeletonModuleImpl impl : sequence)
+            try {
+                impl.load();
+            } catch (KeletonModuleException e) {
+                if(impl.getState().equals(KeletonModule.State.FAILED))
+                    failedOnLoad.add(impl.getId());
+            }
+    }
+
+    void enableAll()
+    {
+
+    }
+
+    void disableAll()
+    {
+
+    }
+
+    void destroyAll()
+    {
+
+    }
+
     KeletonModuleImpl getModule(String id)
     {
         return modules.get(id);
@@ -117,6 +148,8 @@ public class ModuleSequence {
     {
         return modules.containsKey(id);
     }
+
+    private final Set<String> failedOnLoad;
 
     private final List<KeletonModuleImpl> sequence;
 
