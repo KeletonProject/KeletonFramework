@@ -40,6 +40,8 @@ public interface KeletonModuleEvent extends ProceduralEvent {
 
     public interface Recovery extends KeletonModuleEvent, ProceduralEvent
     {
+        public Throwable getException();
+
         public interface Pre extends Recovery, ProceduralEvent.Pre, CancellableWithCause
         {
         }
@@ -50,7 +52,7 @@ public interface KeletonModuleEvent extends ProceduralEvent {
 
         public interface Failed extends Recovery, ProceduralEvent.Failed
         {
-            public Optional<Throwable> getException();
+            public Optional<Throwable> getRecoveryException();
         }
 
         public interface Recovered extends Recovery, ProceduralEvent.Completed

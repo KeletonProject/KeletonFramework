@@ -1,8 +1,8 @@
 package org.kucro3.keleton.implementation;
 
-import org.kucro3.keleton.implementation.exception.KeletonModuleException;
-
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public interface KeletonModule {
     public String getId();
@@ -15,11 +15,13 @@ public interface KeletonModule {
 
     public State getState();
 
-    public void load();
+    public Optional<CompletableFuture<Void>> load();
 
-    public void enable();
+    public Optional<CompletableFuture<Void>> enable();
 
-    public void disable();
+    public Optional<CompletableFuture<Void>> disable();
+
+    public Optional<CompletableFuture<Void>> destroy();
 
     enum State {
         MOUNTED(0x00),

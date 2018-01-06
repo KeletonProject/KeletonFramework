@@ -34,6 +34,7 @@ public class ModuleSequence {
         }
 
         this.failedOnLoad = new HashSet<>();
+        this.fenced = new HashSet<>();
         this.sequence = computeSequence();
     }
 
@@ -46,6 +47,7 @@ public class ModuleSequence {
         this.modules = new HashMap<>(modules);
         this.sequence = null;
         this.failedOnLoad = null;
+        this.fenced = null;
     }
 
     void checkDependedAndRemove(KeletonModuleImpl impl) throws KeletonModuleException
@@ -150,6 +152,8 @@ public class ModuleSequence {
     }
 
     private final Set<String> failedOnLoad;
+
+    private final Set<String> fenced;
 
     private final List<KeletonModuleImpl> sequence;
 

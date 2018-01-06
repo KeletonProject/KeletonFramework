@@ -8,13 +8,14 @@ import org.kucro3.keleton.implementation.exception.KeletonModuleException;
 import org.kucro3.keleton.implementation.exception.KeletonModuleExecutionException;
 import org.kucro3.keleton.implementation.exception.KeletonModuleFunctionException;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 public class KeletonModuleImpl implements KeletonModule {
     KeletonModuleImpl(KeletonInstance instance, Module info)
@@ -62,10 +63,15 @@ public class KeletonModuleImpl implements KeletonModule {
     Void exceptionally(Throwable e, State expected)
     {
         try {
-            this.instance.tryRecovery(this, expected, e);
+            if(!prepostRecovery(e, expected))
+                return null;
+            if(!this.instance.tryRecovery(this, expected, e))
+                postFailedOnRecovery(e, expected, null);
+            else
+                postRecovered(e, expected, expected);
         } catch (Throwable recoveryException) {
             this.state = State.FAILED;
-            postFailedOnRecovery(expected, recoveryException);
+            postFailedOnRecovery(e, expected, recoveryException);
         }
         return null;
     }
@@ -76,60 +82,49 @@ public class KeletonModuleImpl implements KeletonModule {
         postTransformed();
     }
 
-    @Override
-    public void load()
+    Optional<CompletableFuture<Void>> transform(State to, ActionFunction function, Supplier<Boolean> checker)
     {
-        checkConvert(State.LOADED);
+        if(!checker.get() || !checkConvert(to) || !prepostTransformation(to))
+            return Optional.empty();
 
         fence();
 
         try {
-            CompletableFuture<Void> future = instance.onLoad();
+            CompletableFuture<Void> future = function.get();
 
-            future.exceptionally((e) -> exceptionally(e, State.LOADED));
+            future.exceptionally((e) -> exceptionally(e, to));
 
-            future.thenAccept((unused) -> transformed(State.LOADED));
+            return Optional.of(future.thenAccept((unused) -> transformed(to)));
         } catch (Exception e) {
-            postExcepted(State.LOADED, e);
+            postExcepted(to, e);
         }
+
+        return Optional.empty();
     }
 
     @Override
-    public void enable() throws KeletonModuleException
+    public Optional<CompletableFuture<Void>> load()
     {
-        checkConvert(State.ENABLED);
-
-        fence();
-
-        try {
-             instance.onEnable();
-        } catch (Exception e) {
-
-            throw new KeletonModuleExecutionException(e);
-        }
-
-        this.state = State.ENABLED;
-        postTransformed();
+        return transform(State.LOADED, () -> instance.onLoad(), () -> true);
     }
 
     @Override
-    public void disable() throws KeletonModuleException {
-        checkDisablingFunction();
-        checkConvert(State.DISABLED);
+    public Optional<CompletableFuture<Void>> enable()
+    {
+        return transform(State.ENABLED, () -> instance.onEnable(), () -> true);
 
-        synchronized (callback) {
-            callback.onDisable(this);
-            fence();
-        }
+    }
 
-        try {
-            instance.onDisable().thenAccept();
-        } catch (Exception e) {
-            throw new KeletonModuleExecutionException(e);
-        }
+    @Override
+    public Optional<CompletableFuture<Void>> disable()
+    {
+        return transform(State.DISABLED, () -> instance.onDisable(), () -> checkDisablingFunction());
+    }
 
-        this.state = State.DISABLED;
-        postTransformed();
+    @Override
+    public Optional<CompletableFuture<Void>> destroy()
+    {
+        return transform(State.DESTROYED, () -> instance.onDestroy(), () -> true);
     }
 
     void postExcepted(State expected, Exception e)
@@ -142,12 +137,35 @@ public class KeletonModuleImpl implements KeletonModule {
         Sponge.getEventManager().post(new StateTransformationEventImpl.Transformed(this, this.state, State.ENABLED, createCause()));
     }
 
-    void postFailedOnRecovery(State expected, Throwable exception)
+    void postFailedOnRecovery(Throwable source, State expected, Throwable exception)
     {
-        Sponge.getEventManager().post(new FailedOnRecoveryEventImpl(this, expected, exception, createCause()));
+        Sponge.getEventManager().post(new RecoveryEventImpl.Failed(this, expected, source, createCause(), exception));
     }
 
-    boolean prepost(State expected)
+    void postRecovered(Throwable source, State expected, State achieved)
+    {
+        Sponge.getEventManager().post(new RecoveryEventImpl.Recovered(this, expected, source, createCause(), achieved));
+    }
+
+    boolean prepostRecovery(Throwable source, State expected)
+    {
+        KeletonModuleEvent.Recovery.Pre event = new RecoveryEventImpl.Pre(this, expected, source, createCause());
+        Sponge.getEventManager().post(event);
+
+        if(event.isCancelled())
+        {
+            Cause cause = createCause();
+            if(event.isCancelledWithCause())
+                cause = cause.merge(event.getCancellationCause().get());
+
+            Sponge.getEventManager().post(new RecoveryEventImpl.Cancelled(this, expected, source, cause));
+            return false;
+        }
+
+        return true;
+    }
+
+    boolean prepostTransformation(State expected)
     {
         KeletonModuleEvent.StateTransformation.Pre event = new StateTransformationEventImpl.Pre(this, this.state, expected, createCause());
         Sponge.getEventManager().post(event);
@@ -165,14 +183,15 @@ public class KeletonModuleImpl implements KeletonModule {
         return true;
     }
 
-    void checkDisablingFunction() throws KeletonModuleException
+    boolean checkDisablingFunction()
     {
         if(!supportDisabling())
         {
             String msg = "Disabing operation not supported";
             Sponge.getEventManager().post(new StateTransformationEventImpl.Ignored(this, this.state, State.DISABLED, createCause(), msg));
-            throw new KeletonModuleFunctionException(msg);
+            return false;
         }
+        return true;
     }
 
     boolean touchState(State state)
@@ -219,5 +238,10 @@ public class KeletonModuleImpl implements KeletonModule {
     static interface DisablingCallback
     {
         void onDisable(KeletonModuleImpl module) throws KeletonModuleException;
+    }
+
+    static interface ActionFunction
+    {
+        CompletableFuture<Void> get() throws Exception;
     }
 }

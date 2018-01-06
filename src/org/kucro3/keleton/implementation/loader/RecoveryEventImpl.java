@@ -6,12 +6,13 @@ import org.spongepowered.api.event.cause.Cause;
 
 import java.util.Optional;
 
-abstract class FailedOnRecoveryEventImpl implements KeletonModuleEvent.Recovery {
-    FailedOnRecoveryEventImpl(KeletonModule module, KeletonModule.State expected, Cause cause)
+abstract class RecoveryEventImpl implements KeletonModuleEvent.Recovery {
+    RecoveryEventImpl(KeletonModule module, KeletonModule.State expected, Throwable exception, Cause cause)
     {
         this.module = module;
         this.expected = expected;
         this.cause = cause;
+        this.exception = exception;
     }
 
     @Override
@@ -32,17 +33,25 @@ abstract class FailedOnRecoveryEventImpl implements KeletonModuleEvent.Recovery 
         return expected;
     }
 
+    @Override
+    public Throwable getException()
+    {
+        return exception;
+    }
+
+    private final Throwable exception;
+
     private final KeletonModule module;
 
     private final KeletonModule.State expected;
 
     private final Cause cause;
 
-    static class Pre extends FailedOnRecoveryEventImpl implements Recovery.Pre
+    static class Pre extends RecoveryEventImpl implements Recovery.Pre
     {
-        Pre(KeletonModule module, KeletonModule.State expected, Cause cause)
+        Pre(KeletonModule module, KeletonModule.State expected, Throwable exception, Cause cause)
         {
-            super(module, expected, cause);
+            super(module, expected, exception, cause);
         }
 
         @Override
@@ -77,24 +86,24 @@ abstract class FailedOnRecoveryEventImpl implements KeletonModuleEvent.Recovery 
         private Cause cause;
     }
 
-    static class Cancelled extends FailedOnRecoveryEventImpl implements Recovery.Cancelled
+    static class Cancelled extends RecoveryEventImpl implements Recovery.Cancelled
     {
-        Cancelled(KeletonModule module, KeletonModule.State expected, Cause cause)
+        Cancelled(KeletonModule module, KeletonModule.State expected, Throwable exception, Cause cause)
         {
-            super(module, expected, cause);
+            super(module, expected, exception, cause);
         }
     }
 
-    static class Failed extends FailedOnRecoveryEventImpl implements Recovery.Failed
+    static class Failed extends RecoveryEventImpl implements Recovery.Failed
     {
-        Failed(KeletonModule module, KeletonModule.State expected, Cause cause, Throwable exception)
+        Failed(KeletonModule module, KeletonModule.State expected, Throwable exception, Cause cause, Throwable recoveryException)
         {
-            super(module, expected, cause);
-            this.exception = exception;
+            super(module, expected, exception, cause);
+            this.exception = recoveryException;
         }
 
         @Override
-        public Optional<Throwable> getException()
+        public Optional<Throwable> getRecoveryException()
         {
             return Optional.ofNullable(exception);
         }
@@ -102,11 +111,12 @@ abstract class FailedOnRecoveryEventImpl implements KeletonModuleEvent.Recovery 
         private final Throwable exception;
     }
 
-    static class Recovered extends FailedOnRecoveryEventImpl implements Recovery.Recovered
+    static class Recovered extends RecoveryEventImpl implements Recovery.Recovered
     {
-        Recovered(KeletonModule module, KeletonModule.State expected, Cause cause, KeletonModule.State achieved)
+
+        Recovered(KeletonModule module, KeletonModule.State expected, Throwable exception, Cause cause, KeletonModule.State achieved)
         {
-            super(module, expected, cause);
+            super(module, expected, exception, cause);
             this.achieved = achieved;
         }
 
