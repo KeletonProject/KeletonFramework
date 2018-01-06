@@ -96,6 +96,14 @@ abstract class StateTransformationEventImpl implements KeletonModuleEvent.StateT
         private volatile Cause cause;
     }
 
+    static class Cancelled extends StateTransformationEventImpl implements KeletonModuleEvent.StateTransformation.Cancelled
+    {
+        Cancelled(KeletonModule module, KeletonModule.State from, KeletonModule.State to, Cause cause)
+        {
+            super(module, from, to, cause);
+        }
+    }
+
     static class Transformed extends StateTransformationEventImpl implements KeletonModuleEvent.StateTransformation.Transformed
     {
         Transformed(KeletonModule module, KeletonModule.State from, KeletonModule.State to, Cause cause)

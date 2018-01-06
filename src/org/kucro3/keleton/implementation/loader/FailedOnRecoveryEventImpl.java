@@ -48,7 +48,7 @@ abstract class FailedOnRecoveryEventImpl implements KeletonModuleEvent.Recovery 
         @Override
         public Optional<Cause> getCancellationCause()
         {
-            return Optional.empty();
+            return Optional.ofNullable(cause);
         }
 
         @Override
@@ -61,7 +61,7 @@ abstract class FailedOnRecoveryEventImpl implements KeletonModuleEvent.Recovery 
         @Override
         public boolean isCancelled()
         {
-            return false;
+            return cancelled;
         }
 
         @Override
@@ -75,5 +75,47 @@ abstract class FailedOnRecoveryEventImpl implements KeletonModuleEvent.Recovery 
         private boolean cancelled;
 
         private Cause cause;
+    }
+
+    static class Cancelled extends FailedOnRecoveryEventImpl implements Recovery.Cancelled
+    {
+        Cancelled(KeletonModule module, KeletonModule.State expected, Cause cause)
+        {
+            super(module, expected, cause);
+        }
+    }
+
+    static class Failed extends FailedOnRecoveryEventImpl implements Recovery.Failed
+    {
+        Failed(KeletonModule module, KeletonModule.State expected, Cause cause, Throwable exception)
+        {
+            super(module, expected, cause);
+            this.exception = exception;
+        }
+
+        @Override
+        public Optional<Throwable> getException()
+        {
+            return Optional.ofNullable(exception);
+        }
+
+        private final Throwable exception;
+    }
+
+    static class Recovered extends FailedOnRecoveryEventImpl implements Recovery.Recovered
+    {
+        Recovered(KeletonModule module, KeletonModule.State expected, Cause cause, KeletonModule.State achieved)
+        {
+            super(module, expected, cause);
+            this.achieved = achieved;
+        }
+
+        @Override
+        public KeletonModule.State recoveredTo()
+        {
+            return achieved;
+        }
+
+        private final KeletonModule.State achieved;
     }
 }

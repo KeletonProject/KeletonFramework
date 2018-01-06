@@ -3,10 +3,12 @@ package org.kucro3.keleton.implementation.loader;
 import org.kucro3.keleton.implementation.KeletonInstance;
 import org.kucro3.keleton.implementation.KeletonModule;
 import org.kucro3.keleton.implementation.Module;
+import org.kucro3.keleton.implementation.event.KeletonModuleEvent;
 import org.kucro3.keleton.implementation.exception.KeletonModuleException;
 import org.kucro3.keleton.implementation.exception.KeletonModuleExecutionException;
 import org.kucro3.keleton.implementation.exception.KeletonModuleFunctionException;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 
 import java.util.Arrays;
@@ -143,6 +145,24 @@ public class KeletonModuleImpl implements KeletonModule {
     void postFailedOnRecovery(State expected, Throwable exception)
     {
         Sponge.getEventManager().post(new FailedOnRecoveryEventImpl(this, expected, exception, createCause()));
+    }
+
+    boolean prepost(State expected)
+    {
+        KeletonModuleEvent.StateTransformation.Pre event = new StateTransformationEventImpl.Pre(this, this.state, expected, createCause());
+        Sponge.getEventManager().post(event);
+
+        if(event.isCancelled())
+        {
+            Cause cause = createCause();
+            if(event.isCancelledWithCause())
+                cause = cause.merge(event.getCancellationCause().get());
+
+            Sponge.getEventManager().post(new StateTransformationEventImpl.Cancelled(this, this.state, expected, cause));
+            return false;
+        }
+
+        return true;
     }
 
     void checkDisablingFunction() throws KeletonModuleException
