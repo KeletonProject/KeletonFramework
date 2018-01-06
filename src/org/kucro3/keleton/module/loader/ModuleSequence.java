@@ -1,6 +1,7 @@
 package org.kucro3.keleton.module.loader;
 
 import org.kucro3.keleton.exception.KeletonException;
+import org.kucro3.keleton.module.KeletonModule;
 import org.kucro3.keleton.module.exception.KeletonLoaderException;
 import org.kucro3.keleton.module.exception.KeletonModuleException;
 import org.kucro3.keleton.module.exception.KeletonModuleFunctionException;
@@ -152,6 +153,11 @@ public class ModuleSequence {
     boolean hasModule(String id)
     {
         return modules.containsKey(id);
+    }
+
+    Map<String, KeletonModuleImpl> getModules()
+    {
+        return modules;
     }
 
     final List<KeletonModuleImpl> sequence;

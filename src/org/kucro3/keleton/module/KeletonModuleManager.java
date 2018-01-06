@@ -11,4 +11,6 @@ public interface KeletonModuleManager {
     public Collection<KeletonModule> getDemanders(String name);
 
     public Map<String, KeletonModule> getModules();
+
+    public KeletonModule getModule(String name);
 }
