@@ -22,6 +22,12 @@ public interface KeletonModuleEvent extends ProceduralEvent {
 
         public interface Ignored extends StateTransformation, ProceduralEvent.Failed
         {
+            public String getMessage();
+        }
+
+        public interface Failed extends StateTransformation, ProceduralEvent.Failed
+        {
+            public Throwable getException();
         }
 
         public interface Transformed extends StateTransformation, ProceduralEvent.Completed

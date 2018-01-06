@@ -3,6 +3,7 @@ package org.kucro3.keleton.implementation.loader;
 import org.kucro3.keleton.implementation.KeletonModule;
 import org.kucro3.keleton.implementation.event.KeletonModuleEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 
 import java.util.Optional;
 
@@ -41,10 +42,19 @@ abstract class StateTransformationEventImpl implements KeletonModuleEvent.StateT
 
     static class Ignored extends StateTransformationEventImpl implements KeletonModuleEvent.StateTransformation.Ignored
     {
-        Ignored(KeletonModule module, KeletonModule.State from, KeletonModule.State to, Cause cause)
+        Ignored(KeletonModule module, KeletonModule.State from, KeletonModule.State to, Cause cause, String info)
         {
             super(module, from, to, cause);
+            this.info = info;
         }
+
+        @Override
+        public String getMessage()
+        {
+            return info;
+        }
+
+        private final String info;
     }
 
     static class Pre extends StateTransformationEventImpl implements KeletonModuleEvent.StateTransformation.Pre
@@ -92,6 +102,23 @@ abstract class StateTransformationEventImpl implements KeletonModuleEvent.StateT
         {
             super(module, from, to, cause);
         }
+    }
+
+    static class Failed extends StateTransformationEventImpl implements KeletonModuleEvent.StateTransformation.Failed
+    {
+        Failed(KeletonModule module, KeletonModule.State from, KeletonModule.State to, Cause cause, Exception exception)
+        {
+            super(module, from, to, cause.merge(Cause.of(NamedCause.of("exception", exception))));
+            this.exception = exception;
+        }
+
+        @Override
+        public Throwable getException()
+        {
+            return exception;
+        }
+
+        private final Throwable exception;
     }
 
     private final Cause cause;

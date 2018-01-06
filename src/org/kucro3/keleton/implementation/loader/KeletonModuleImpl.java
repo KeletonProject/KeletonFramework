@@ -6,6 +6,8 @@ import org.kucro3.keleton.implementation.Module;
 import org.kucro3.keleton.implementation.exception.KeletonModuleException;
 import org.kucro3.keleton.implementation.exception.KeletonModuleExecutionException;
 import org.kucro3.keleton.implementation.exception.KeletonModuleFunctionException;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.cause.Cause;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -57,10 +59,12 @@ public class KeletonModuleImpl implements KeletonModule {
         try {
             instance.onLoad();
         } catch (Exception e) {
+            Sponge.getEventManager().post(new StateTransformationEventImpl.Failed(this, this.state, State.ENABLED, createCause(), e));
             throw new KeletonModuleExecutionException(e);
         }
 
         this.state = State.LOADED;
+        postTransformed();
     }
 
     @Override
@@ -71,10 +75,12 @@ public class KeletonModuleImpl implements KeletonModule {
         try {
              instance.onEnable();
         } catch (Exception e) {
+            Sponge.getEventManager().post(new StateTransformationEventImpl.Failed(this, this.state, State.ENABLED, createCause(), e));
             throw new KeletonModuleExecutionException(e);
         }
 
         this.state = State.ENABLED;
+        postTransformed();
     }
 
     @Override
@@ -88,16 +94,27 @@ public class KeletonModuleImpl implements KeletonModule {
         try {
             instance.onDisable();
         } catch (Exception e) {
+            Sponge.getEventManager().post(new StateTransformationEventImpl.Failed(this, this.state, State.ENABLED, createCause(), e));
             throw new KeletonModuleExecutionException(e);
         }
 
         this.state = State.DISABLED;
+        postTransformed();
+    }
+
+    void postTransformed()
+    {
+        Sponge.getEventManager().post(new StateTransformationEventImpl.Transformed(this, this.state, State.ENABLED, createCause()));
     }
 
     void checkDisablingFunction() throws KeletonModuleException
     {
         if(!supportDisabling())
-            throw new KeletonModuleFunctionException("Disabling operation not supported");
+        {
+            String msg = "Disabing operation not supported";
+            Sponge.getEventManager().post(new StateTransformationEventImpl.Ignored(this, this.state, State.DISABLED, createCause(), msg));
+            throw new KeletonModuleFunctionException(msg);
+        }
     }
 
     boolean touchState(State state)
@@ -115,7 +132,14 @@ public class KeletonModuleImpl implements KeletonModule {
 
     void stateFailure(State state) throws KeletonModuleException
     {
-        throw new KeletonModuleFunctionException("Cannot convert the current state " + this.state.name() + " to " + state.name());
+        String msg = "Cannot convert the current state " + this.state.name() + " to " + state.name();
+        Sponge.getEventManager().post(new StateTransformationEventImpl.Ignored(this, this.state, state, createCause(), msg));
+        throw new KeletonModuleFunctionException(msg);
+    }
+
+    Cause createCause()
+    {
+        return Cause.source(this).build();
     }
 
     DisablingCallback callback;
