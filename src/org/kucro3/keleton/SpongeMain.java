@@ -1,8 +1,8 @@
 package org.kucro3.keleton;
 
 import com.google.inject.Inject;
-import org.kucro3.keleton.implementation.KeletonInstance;
-import org.kucro3.keleton.implementation.Module;
+import org.kucro3.keleton.module.KeletonInstance;
+import org.kucro3.keleton.module.Module;
 import org.slf4j.Logger;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;

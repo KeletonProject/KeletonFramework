@@ -1,4 +1,4 @@
-package org.kucro3.keleton.implementation;
+package org.kucro3.keleton.module;
 
 import java.util.Optional;
 import java.util.Set;

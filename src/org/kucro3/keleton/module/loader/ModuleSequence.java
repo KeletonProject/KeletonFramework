@@ -1,9 +1,9 @@
-package org.kucro3.keleton.implementation.loader;
+package org.kucro3.keleton.module.loader;
 
-import org.kucro3.keleton.implementation.KeletonModule;
-import org.kucro3.keleton.implementation.exception.KeletonLoaderException;
-import org.kucro3.keleton.implementation.exception.KeletonModuleException;
-import org.kucro3.keleton.implementation.exception.KeletonModuleFunctionException;
+import org.kucro3.keleton.module.KeletonModule;
+import org.kucro3.keleton.module.exception.KeletonLoaderException;
+import org.kucro3.keleton.module.exception.KeletonModuleException;
+import org.kucro3.keleton.module.exception.KeletonModuleFunctionException;
 
 import java.util.*;
 

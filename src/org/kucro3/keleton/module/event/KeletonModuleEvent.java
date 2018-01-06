@@ -1,8 +1,8 @@
-package org.kucro3.keleton.implementation.event;
+package org.kucro3.keleton.module.event;
 
 import org.kucro3.keleton.event.CancellableWithCause;
 import org.kucro3.keleton.event.ProceduralEvent;
-import org.kucro3.keleton.implementation.KeletonModule;
+import org.kucro3.keleton.module.KeletonModule;
 
 import java.util.Optional;
 

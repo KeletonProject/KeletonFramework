@@ -1,4 +1,4 @@
-package org.kucro3.keleton.implementation;
+package org.kucro3.keleton.module;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

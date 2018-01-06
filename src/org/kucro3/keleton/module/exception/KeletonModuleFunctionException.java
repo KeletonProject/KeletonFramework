@@ -1,4 +1,4 @@
-package org.kucro3.keleton.implementation.exception;
+package org.kucro3.keleton.module.exception;
 
 public class KeletonModuleFunctionException extends KeletonModuleException {
     public KeletonModuleFunctionException()
