@@ -52,7 +52,7 @@ public interface KeletonModuleEvent extends ProceduralEvent {
 
         public interface Failed extends Recovery, ProceduralEvent.Failed
         {
-            public Optional<Throwable> getRecoveryException();
+            public Throwable getRecoveryException();
         }
 
         public interface Recovered extends Recovery, ProceduralEvent.Completed

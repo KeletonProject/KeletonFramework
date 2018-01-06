@@ -64,7 +64,7 @@ public class KeletonModuleImpl implements KeletonModule {
             if(!prepostRecovery(e, expected))
                 return null;
             if(!this.instance.tryRecovery(this, expected, e))
-                postFailedOnRecovery(e, expected, null);
+                postExcepted(expected, e);
             else {
                 this.state = expected;
                 postRecovered(e, expected, expected);
@@ -112,7 +112,6 @@ public class KeletonModuleImpl implements KeletonModule {
     public Optional<CompletableFuture<Void>> enable()
     {
         return transform(State.ENABLED, () -> instance.onEnable(), () -> true);
-
     }
 
     @Override
@@ -127,7 +126,7 @@ public class KeletonModuleImpl implements KeletonModule {
         return transform(State.DESTROYED, () -> instance.onDestroy(), () -> true);
     }
 
-    void postExcepted(State expected, Exception e)
+    void postExcepted(State expected, Throwable e)
     {
         Sponge.getEventManager().post(new StateTransformationEventImpl.Failed(this, this.state, State.ENABLED, createCause(), e));
     }
@@ -259,7 +258,16 @@ public class KeletonModuleImpl implements KeletonModule {
         return Cause.source(this).build();
     }
 
+    void bind(ModuleSequence seq) throws KeletonModuleException
+    {
+        if(this.seq != null)
+            throw new KeletonModuleException("Already binded: " + this.getId());
+        this.seq = seq;
+    }
+
     DisablingCallback callback;
+
+    ModuleSequence seq;
 
     private volatile State state;
 

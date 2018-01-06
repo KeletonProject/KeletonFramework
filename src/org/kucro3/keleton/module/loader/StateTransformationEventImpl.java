@@ -114,7 +114,7 @@ abstract class StateTransformationEventImpl implements KeletonModuleEvent.StateT
 
     static class Failed extends StateTransformationEventImpl implements KeletonModuleEvent.StateTransformation.Failed
     {
-        Failed(KeletonModule module, KeletonModule.State from, KeletonModule.State to, Cause cause, Exception exception)
+        Failed(KeletonModule module, KeletonModule.State from, KeletonModule.State to, Cause cause, Throwable exception)
         {
             super(module, from, to, cause.merge(Cause.of(NamedCause.of("exception", exception))));
             this.exception = exception;

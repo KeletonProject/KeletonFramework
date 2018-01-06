@@ -1,14 +1,16 @@
 package org.kucro3.keleton.module.loader;
 
-import org.kucro3.keleton.module.KeletonModule;
+import org.kucro3.keleton.exception.KeletonException;
 import org.kucro3.keleton.module.exception.KeletonLoaderException;
 import org.kucro3.keleton.module.exception.KeletonModuleException;
 import org.kucro3.keleton.module.exception.KeletonModuleFunctionException;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ModuleSequence {
-    ModuleSequence(Collection<KeletonModuleImpl> modules) throws KeletonLoaderException
+    ModuleSequence(Collection<KeletonModuleImpl> modules) throws KeletonException
     {
         this.modules = new HashMap<>();
         this.dependencies = new HashMap<>();
@@ -16,6 +18,7 @@ public class ModuleSequence {
 
         for(KeletonModuleImpl impl : modules)
         {
+            impl.bind(this);
             impl.callback = this::checkDependedAndRemove;
 
             this.modules.put(impl.getId(), impl);
@@ -33,8 +36,6 @@ public class ModuleSequence {
             }
         }
 
-        this.failedOnLoad = new HashSet<>();
-        this.fenced = new HashSet<>();
         this.sequence = computeSequence();
     }
 
@@ -46,8 +47,6 @@ public class ModuleSequence {
         this.dependencies = new HashMap<>(dependencies);
         this.modules = new HashMap<>(modules);
         this.sequence = null;
-        this.failedOnLoad = null;
-        this.fenced = null;
     }
 
     void checkDependedAndRemove(KeletonModuleImpl impl) throws KeletonModuleException
@@ -113,17 +112,8 @@ public class ModuleSequence {
         return result;
     }
 
-    void loadAll()
+    void loadAll() throws KeletonException
     {
-        failedOnLoad.clear();
-
-        for(KeletonModuleImpl impl : sequence)
-            try {
-                impl.load();
-            } catch (KeletonModuleException e) {
-                if(impl.getState().equals(KeletonModule.State.FAILED))
-                    failedOnLoad.add(impl.getId());
-            }
     }
 
     void enableAll()
@@ -151,15 +141,11 @@ public class ModuleSequence {
         return modules.containsKey(id);
     }
 
-    private final Set<String> failedOnLoad;
+    final List<KeletonModuleImpl> sequence;
 
-    private final Set<String> fenced;
+    final Map<String, Set<String>> demanders;
 
-    private final List<KeletonModuleImpl> sequence;
+    final Map<String, Set<String>> dependencies;
 
-    private final Map<String, Set<String>> demanders;
-
-    private final Map<String, Set<String>> dependencies;
-
-    private final Map<String, KeletonModuleImpl> modules;
+    final Map<String, KeletonModuleImpl> modules;
 }

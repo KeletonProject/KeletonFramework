@@ -103,9 +103,9 @@ abstract class RecoveryEventImpl implements KeletonModuleEvent.Recovery {
         }
 
         @Override
-        public Optional<Throwable> getRecoveryException()
+        public Throwable getRecoveryException()
         {
-            return Optional.ofNullable(exception);
+            return exception;
         }
 
         private final Throwable exception;
