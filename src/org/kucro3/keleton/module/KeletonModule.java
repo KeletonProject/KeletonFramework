@@ -15,11 +15,19 @@ public interface KeletonModule {
 
     public State getState();
 
+    public Optional<CompletableFuture<Void>> loadImmediately();
+
     public Optional<CompletableFuture<Void>> load();
+
+    public Optional<CompletableFuture<Void>> enableImmediately();
 
     public Optional<CompletableFuture<Void>> enable();
 
+    public Optional<CompletableFuture<Void>> disableImmediately();
+
     public Optional<CompletableFuture<Void>> disable();
+
+    public Optional<CompletableFuture<Void>> destroyImmediately();
 
     public Optional<CompletableFuture<Void>> destroy();
 

@@ -6,8 +6,6 @@ import org.kucro3.keleton.module.exception.KeletonModuleException;
 import org.kucro3.keleton.module.exception.KeletonModuleFunctionException;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ModuleSequence {
     ModuleSequence(Collection<KeletonModuleImpl> modules) throws KeletonException
@@ -85,6 +83,16 @@ public class ModuleSequence {
         return Collections.unmodifiableSet(set);
     }
 
+    Set<String> getDependencies(String id)
+    {
+        Set<String> set = dependencies.get(id);
+
+        if(set == null)
+            return Collections.emptySet();
+
+        return Collections.unmodifiableSet(set);
+    }
+
     List<KeletonModuleImpl> computeSequence() throws KeletonLoaderException
     {
         ModuleSequence subseq = new ModuleSequence(demanders, dependencies, modules);
@@ -112,23 +120,28 @@ public class ModuleSequence {
         return result;
     }
 
-    void loadAll() throws KeletonException
+    void loadAll()
     {
+        for(KeletonModuleImpl impl : sequence)
+            impl.load();
     }
 
     void enableAll()
     {
-
+        for(KeletonModuleImpl impl : sequence)
+            impl.enable();
     }
 
     void disableAll()
     {
-
+        for(int i = sequence.size() - 1; i >= 0; i--)
+            sequence.get(i).disable();
     }
 
     void destroyAll()
     {
-
+        for(int i = sequence.size() - 1; i >= 0; i--)
+            sequence.get(i).destroy();
     }
 
     KeletonModuleImpl getModule(String id)

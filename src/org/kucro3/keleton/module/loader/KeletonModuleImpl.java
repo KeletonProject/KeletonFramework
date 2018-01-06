@@ -4,15 +4,14 @@ import org.kucro3.keleton.module.KeletonInstance;
 import org.kucro3.keleton.module.KeletonModule;
 import org.kucro3.keleton.module.Module;
 import org.kucro3.keleton.module.event.KeletonModuleEvent;
+import org.kucro3.keleton.module.exception.KeletonModuleBadDependencyException;
 import org.kucro3.keleton.module.exception.KeletonModuleException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.Cause;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class KeletonModuleImpl implements KeletonModule {
@@ -55,16 +54,50 @@ public class KeletonModuleImpl implements KeletonModule {
 
     void fence()
     {
-        this.state = State.FENCED;
+        synchronized(state) {
+            this.state = State.FENCED;
+        }
     }
 
-    Void exceptionally(Throwable e, State expected)
+    synchronized boolean enterFence()
+    {
+        synchronized(state) {
+            if (state.equals(State.FENCED))
+                return false;
+
+            if (fencedState != null)
+                throw new IllegalStateException();
+
+            fencedState = state;
+            state = State.FENCED;
+            return true;
+        }
+    }
+
+    synchronized void exitFence()
+    {
+        if(fencedState == null)
+            throw new IllegalStateException();
+        state = fencedState;
+        fencedState = null;
+    }
+
+    Void tryRecovery(Throwable exception, State expected)
+    {
+        return tryRecovery(exception, expected, this::postExcepted);
+    }
+
+    Void tryRecovery(Throwable e, State expected, BiConsumer<State, Throwable> poster)
     {
         try {
-            if(!prepostRecovery(e, expected))
+            if(!prepostRecovery(e, expected)) {
+                this.state = State.FAILED;
                 return null;
-            if(!this.instance.tryRecovery(this, expected, e))
-                postExcepted(expected, e);
+            }
+            if(!this.instance.tryRecovery(this, expected, e)) {
+                this.state = State.FAILED;
+                poster.accept(expected, e);
+            }
             else {
                 this.state = expected;
                 postRecovered(e, expected, expected);
@@ -76,10 +109,16 @@ public class KeletonModuleImpl implements KeletonModule {
         return null;
     }
 
+    void releaseDependencies()
+    {
+        for(String dep : seq.getDependencies(getId()))
+            seq.getModule(dep).exitFence();
+    }
+
     void transformed(State to)
     {
         this.state = to;
-        postTransformed();
+        postTransformed(to);
     }
 
     @Override
@@ -91,16 +130,48 @@ public class KeletonModuleImpl implements KeletonModule {
     @Override
     public boolean waitForDependencies()
     {
+        return queueDependencies(true);
+    }
+
+    boolean queueDependencies(boolean wait)
+    {
         if(!isBound())
             return false;
 
-        for(String dep : getDependencies())
-            seq.getModule(dep).escapeFence();
+        Set<String> dependencies = seq.getDependencies(getId());
+        if(!wait)
+        {
+            ArrayList<KeletonModuleImpl> queued = new ArrayList<>();
+            for (String dep : dependencies) {
+                KeletonModuleImpl module = seq.getModule(dep);
+                if (module.getState().equals(State.FENCED)) {
+                    for(KeletonModuleImpl impl : queued)
+                        impl.exitFence();
+                    return false;
+                }
+                else {
+                    if(!module.enterFence())
+                    {
+                        for(KeletonModuleImpl impl : queued)
+                            impl.exitFence();
+                        return false;
+                    }
+                    queued.add(module);
+                }
+            }
+        }
+        else
+            for (String dep : dependencies) {
+                KeletonModuleImpl module = seq.getModule(dep);
+                if (module.getState().equals(State.FENCED))
+                    while(!module.enterFence())
+                        module.escapeFence();
+            }
 
         return true;
     }
 
-    Optional<CompletableFuture<Void>> transform(State to, ActionFunction function, Supplier<Boolean> checker)
+    private Optional<CompletableFuture<Void>> transform(State to, ActionFunction function, Supplier<Boolean> checker, boolean wait)
     {
         if(!checkBind() || !checker.get() || !checkConvert(to) || !prepostTransformation(to))
             return Optional.empty();
@@ -108,15 +179,29 @@ public class KeletonModuleImpl implements KeletonModule {
         fence();
 
         try {
-            waitForDependencies();
+            if(!queueDependencies(wait))
+                return Optional.empty();
+
+            KeletonModule module;
+            for(String dep : seq.getDependencies(getId()))
+                if((module = seq.getModule(dep)).getState().equals(State.FAILED))
+                {
+                    final KeletonModule currentModule = module;
+                    tryRecovery(new KeletonModuleBadDependencyException(currentModule), to, (s, e) -> postBadDependency(s, currentModule));
+
+                    if(this.state.equals(State.FAILED))
+                        return Optional.empty();
+                }
 
             CompletableFuture<Void> future = function.get();
 
-            future.exceptionally((e) -> exceptionally(e, to));
+            future.exceptionally((e) -> tryRecovery(e, to));
 
-            return Optional.of(future.thenAccept((unused) -> transformed(to)));
+            return Optional.of(future
+                            .thenAccept((unused) -> transformed(to))
+                            .thenAccept((unused) -> releaseDependencies()));
         } catch (Exception e) {
-            postExcepted(to, e);
+            tryRecovery(e, to);
         }
 
         return Optional.empty();
@@ -125,35 +210,84 @@ public class KeletonModuleImpl implements KeletonModule {
     @Override
     public Optional<CompletableFuture<Void>> load()
     {
-        return transform(State.LOADED, () -> instance.onLoad(), () -> true);
+        return load0(true);
+    }
+
+    @Override
+    public Optional<CompletableFuture<Void>> loadImmediately()
+    {
+        return load0(false);
+    }
+
+    private Optional<CompletableFuture<Void>> load0(boolean wait)
+    {
+        return transform(State.LOADED, () -> instance.onLoad(), () -> true, wait);
     }
 
     @Override
     public Optional<CompletableFuture<Void>> enable()
     {
-        return transform(State.ENABLED, () -> instance.onEnable(), () -> true);
+        return enable0(true);
+    }
+
+    @Override
+    public Optional<CompletableFuture<Void>> enableImmediately()
+    {
+        return enable0(false);
+    }
+
+    private Optional<CompletableFuture<Void>> enable0(boolean wait)
+    {
+        return transform(State.ENABLED, () -> instance.onEnable(), () -> true, wait);
     }
 
     @Override
     public Optional<CompletableFuture<Void>> disable()
     {
-        return transform(State.DISABLED, () -> instance.onDisable(), () -> checkDisablingFunction());
+        return disable0(true);
+    }
+
+    @Override
+    public Optional<CompletableFuture<Void>> disableImmediately()
+    {
+        return disable0(false);
+    }
+
+    private Optional<CompletableFuture<Void>> disable0(boolean wait)
+    {
+        return transform(State.DISABLED, () -> instance.onDisable(), () -> checkDisablingFunction(), wait);
     }
 
     @Override
     public Optional<CompletableFuture<Void>> destroy()
     {
-        return transform(State.DESTROYED, () -> instance.onDestroy(), () -> true);
+        return destroy0(true);
+    }
+
+    @Override
+    public Optional<CompletableFuture<Void>> destroyImmediately()
+    {
+        return destroy0(false);
+    }
+
+    private Optional<CompletableFuture<Void>> destroy0(boolean wait)
+    {
+        return transform(State.DESTROYED, () -> instance.onDestroy(), () -> true, wait);
+    }
+
+    void postBadDependency(State expected, KeletonModule bad)
+    {
+        Sponge.getEventManager().post(new StateTransformationEventImpl.BadDependency(this, this.state, expected, createCause(), bad));
     }
 
     void postExcepted(State expected, Throwable e)
     {
-        Sponge.getEventManager().post(new StateTransformationEventImpl.Failed(this, this.state, State.ENABLED, createCause(), e));
+        Sponge.getEventManager().post(new StateTransformationEventImpl.Failed(this, this.state, expected, createCause(), e));
     }
 
-    void postTransformed()
+    void postTransformed(State to)
     {
-        Sponge.getEventManager().post(new StateTransformationEventImpl.Transformed(this, this.state, State.ENABLED, createCause()));
+        Sponge.getEventManager().post(new StateTransformationEventImpl.Transformed(this, this.state, to, createCause()));
     }
 
     void postFailedOnRecovery(Throwable source, State expected, Throwable exception)
@@ -291,7 +425,7 @@ public class KeletonModuleImpl implements KeletonModule {
         return result;
     }
 
-    void bind(ModuleSequence seq) throws KeletonModuleException
+    synchronized void bind(ModuleSequence seq) throws KeletonModuleException
     {
         if(this.seq != null)
             throw new KeletonModuleException("Already binded: " + this.getId());
@@ -301,6 +435,8 @@ public class KeletonModuleImpl implements KeletonModule {
     DisablingCallback callback;
 
     ModuleSequence seq;
+
+    volatile State fencedState;
 
     private volatile State state;
 
