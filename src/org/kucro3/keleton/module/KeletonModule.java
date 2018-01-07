@@ -1,5 +1,8 @@
 package org.kucro3.keleton.module;
 
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.plugin.PluginContainer;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -38,6 +41,14 @@ public interface KeletonModule {
         escapeState(State.FENCED);
     }
 
+    public boolean enterFence(FenceEstablisher establisher, FenceObject object);
+
+    public boolean exitFence(FenceEstablisher establisher, FenceObject object);
+
+    public FenceEstablisher getCurrentEstablisher();
+
+    public Set<FenceObject> getCurrentFences();
+
     public void escapeState(State state);
 
     enum State {
@@ -60,5 +71,24 @@ public interface KeletonModule {
         }
 
         private final int code;
+    }
+
+    public static interface FenceEstablisher
+    {
+        public String getFenceEstablisherName();
+
+        public default void compete(KeletonModule module, FenceEstablisher establisher, FenceObject object)
+        {
+        }
+
+        public default Optional<PluginContainer> getPlugin()
+        {
+            return Sponge.getPluginManager().getPlugin(getFenceEstablisherName());
+        }
+    }
+
+    public static interface FenceObject
+    {
+        public String getFenceObjectName();
     }
 }

@@ -1,5 +1,6 @@
 package org.kucro3.keleton;
 
+import org.kucro3.keleton.module.KeletonModule;
 import org.kucro3.keleton.module.KeletonModuleManager;
 import org.kucro3.keleton.module.loader.KeletonModuleManagerImpl;
 
@@ -33,5 +34,12 @@ public class Keleton {
 		return manager;
 	}
 
-	static KeletonModuleManager manager = new KeletonModuleManagerImpl();
+	public static KeletonModule.FenceEstablisher getKeletonEstablisher()
+	{
+		return ESTABLISHER;
+	}
+
+	private static final KeletonModule.FenceEstablisher ESTABLISHER = () -> "keletonframework";
+
+	static KeletonModuleManager manager;
 }

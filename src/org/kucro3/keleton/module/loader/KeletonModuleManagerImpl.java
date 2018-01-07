@@ -5,8 +5,7 @@ import org.kucro3.keleton.module.KeletonModuleManager;
 
 import java.util.*;
 
-public class KeletonModuleManagerImpl implements KeletonModuleManager
-{
+public class KeletonModuleManagerImpl implements KeletonModuleManager {
     @Override
     public boolean hasModule(String name)
     {

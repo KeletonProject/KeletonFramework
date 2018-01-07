@@ -1,5 +1,6 @@
 package org.kucro3.keleton.module.loader;
 
+import org.kucro3.keleton.Keleton;
 import org.kucro3.keleton.module.KeletonInstance;
 import org.kucro3.keleton.module.KeletonModule;
 import org.kucro3.keleton.module.Module;
@@ -11,15 +12,18 @@ import org.spongepowered.api.event.cause.Cause;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public class KeletonModuleImpl implements KeletonModule {
+public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObject {
     KeletonModuleImpl(KeletonInstance instance, Module info)
     {
         this.instance = instance;
         this.info = info;
         this.state = State.MOUNTED;
+
+        this.fenceObjects = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
 
     @Override
@@ -59,27 +63,76 @@ public class KeletonModuleImpl implements KeletonModule {
         }
     }
 
-    synchronized boolean enterFence()
+    @Override
+    public boolean enterFence(FenceEstablisher establisher, FenceObject object)
     {
-        synchronized(state) {
-            if (state.equals(State.FENCED))
-                return false;
+        return enterFence0(establisher, object);
+    }
 
+    @Override
+    public boolean exitFence(FenceEstablisher establisher, FenceObject object)
+    {
+        return exitFence0(establisher, object);
+    }
+
+    @Override
+    public FenceEstablisher getCurrentEstablisher()
+    {
+        return currentEstablisher;
+    }
+
+    @Override
+    public Set<FenceObject> getCurrentFences()
+    {
+        return Collections.unmodifiableSet(fenceObjects);
+    }
+
+    synchronized boolean enterFence0(FenceEstablisher establisher, FenceObject object)
+    {
+        if(this.currentEstablisher == null && this.state.equals(State.FENCED))
+            return false; // fenced by self
+
+        if(this.currentEstablisher != null && establisher != this.currentEstablisher)
+            this.currentEstablisher.compete(this, establisher, object);
+
+        if(this.currentEstablisher != null && establisher != this.currentEstablisher)
+            return false;
+
+        synchronized(state) {
             if (fencedState != null)
-                throw new IllegalStateException();
+                throw new IllegalStateException("null last state");
 
             fencedState = state;
+            fenceObjects.add(object);
             state = State.FENCED;
             return true;
         }
     }
 
-    synchronized void exitFence()
+    synchronized boolean exitFence0(FenceEstablisher establisher, FenceObject object)
     {
-        if(fencedState == null)
-            throw new IllegalStateException();
-        state = fencedState;
-        fencedState = null;
+        if(this.currentEstablisher == null)
+            throw new IllegalStateException("Not in established fence");
+
+        if(this.currentEstablisher != establisher)
+            return false;
+
+        if (fencedState == null)
+            throw new IllegalStateException("null last state");
+
+        boolean result = fenceObjects.remove(object);
+
+        if(fenceObjects.isEmpty())
+        {
+            currentEstablisher = null;
+
+            State state = fencedState;
+            fencedState = null;
+
+            this.state = state;
+        }
+
+        return result;
     }
 
     Void tryRecovery(Throwable exception, State expected)
@@ -112,7 +165,7 @@ public class KeletonModuleImpl implements KeletonModule {
     void releaseDependencies()
     {
         for(String dep : seq.getDependencies(getId()))
-            seq.getModule(dep).exitFence();
+            seq.getModule(dep).exitFence(Keleton.getKeletonEstablisher(), this);
     }
 
     void transformed(State to)
@@ -144,31 +197,30 @@ public class KeletonModuleImpl implements KeletonModule {
             ArrayList<KeletonModuleImpl> queued = new ArrayList<>();
             for (String dep : dependencies) {
                 KeletonModuleImpl module = seq.getModule(dep);
-                if (module.getState().equals(State.FENCED)) {
+                if (!module.enterFence(Keleton.getKeletonEstablisher(), this))
+                {
                     for(KeletonModuleImpl impl : queued)
-                        impl.exitFence();
+                        impl.exitFence(Keleton.getKeletonEstablisher(), this);
                     return false;
                 }
-                else {
-                    if(!module.enterFence())
-                    {
-                        for(KeletonModuleImpl impl : queued)
-                            impl.exitFence();
-                        return false;
-                    }
+                else
                     queued.add(module);
-                }
             }
         }
         else
             for (String dep : dependencies) {
                 KeletonModuleImpl module = seq.getModule(dep);
                 if (module.getState().equals(State.FENCED))
-                    while(!module.enterFence())
+                    while(!module.enterFence(Keleton.getKeletonEstablisher(), this))
                         module.escapeFence();
             }
 
         return true;
+    }
+
+    private void releaseSelf()
+    {
+        exitFence(Keleton.getKeletonEstablisher(), this);
     }
 
     private Optional<CompletableFuture<Void>> transform(State to, ActionFunction function, Supplier<Boolean> checker, boolean wait)
@@ -196,10 +248,9 @@ public class KeletonModuleImpl implements KeletonModule {
             CompletableFuture<Void> future = function.get();
 
             future.exceptionally((e) -> tryRecovery(e, to));
+            future.whenComplete((unused, e) -> releaseDependencies());
 
-            return Optional.of(future
-                            .thenAccept((unused) -> transformed(to))
-                            .thenAccept((unused) -> releaseDependencies()));
+            return Optional.of(future.thenAccept((unused) -> transformed(to)));
         } catch (Exception e) {
             tryRecovery(e, to);
         }
@@ -432,11 +483,21 @@ public class KeletonModuleImpl implements KeletonModule {
         this.seq = seq;
     }
 
+    @Override
+    public String getFenceObjectName()
+    {
+        return "Module:" + getId();
+    }
+
     DisablingCallback callback;
 
     ModuleSequence seq;
 
     volatile State fencedState;
+
+    volatile FenceEstablisher currentEstablisher;
+
+    final Set<FenceObject> fenceObjects;
 
     private volatile State state;
 
