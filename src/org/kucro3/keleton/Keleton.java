@@ -1,5 +1,7 @@
 package org.kucro3.keleton;
 
+import org.kucro3.keleton.api.APIContainer;
+import org.kucro3.keleton.api.ImportAPI;
 import org.kucro3.keleton.module.KeletonModule;
 import org.kucro3.keleton.module.KeletonModuleManager;
 
@@ -9,11 +11,13 @@ import org.kucro3.keleton.module.KeletonModuleManager;
  * @author Kumonda221
  *
  */
+@APIContainer
 public class Keleton {
 	/**
 	 * 获取Keleton框架的主版本号
 	 * @return 主版本号
 	 */
+	@ImportAPI(namespace = "kernel", name = "GetMajorVersion")
 	public static int getMajorVersion()
 	{
 		return 1;
@@ -23,22 +27,25 @@ public class Keleton {
 	 * 获取Keleton框架的次版本号
 	 * @return 次版本号
 	 */
+	@ImportAPI(namespace = "kernel", name = "GetMinorVersion")
 	public static int getMinorVersion()
 	{
 		return 0;
 	}
 
+	@ImportAPI(namespace = "kernel", name = "GetModuleManager")
 	public static KeletonModuleManager getModuleManager()
 	{
 		return manager;
 	}
 
+	@ImportAPI(namespace = "kernel", name = "GetKernelFenceEstablisher")
 	public static KeletonModule.FenceEstablisher getKeletonEstablisher()
 	{
 		return ESTABLISHER;
 	}
 
-	private static final KeletonModule.FenceEstablisher ESTABLISHER = () -> "keletonframework";
+	private static final KeletonModule.FenceEstablisher ESTABLISHER = () -> "keletonkernel";
 
 	static KeletonModuleManager manager;
 }
