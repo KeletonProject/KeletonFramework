@@ -1,5 +1,6 @@
 package org.kucro3.keleton.module.loader;
 
+import org.kucro3.keleton.module.KeletonInstance;
 import org.kucro3.keleton.module.KeletonModule;
 import org.kucro3.keleton.module.event.KeletonLoaderEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -21,13 +22,11 @@ abstract class LoaderEventImpl implements KeletonLoaderEvent {
         return cause;
     }
 
-    @Override
     public String getId()
     {
         return id;
     }
 
-    @Override
     public Set<String> getDependencies()
     {
         return dependencies;
@@ -90,7 +89,7 @@ abstract class LoaderEventImpl implements KeletonLoaderEvent {
     {
         Discovered(Cause cause, KeletonModule module)
         {
-            super(cause, module.getId(), module.getDependencies());
+            super(cause, null, null);
             this.module = module;
         }
 
@@ -105,10 +104,17 @@ abstract class LoaderEventImpl implements KeletonLoaderEvent {
 
     static class Ignored extends LoaderEventImpl implements KeletonLoaderEvent.Ignored
     {
-        Ignored(Cause cause, String id, Set<String> dependencies, String message)
+        Ignored(Cause cause, String message, KeletonInstance instance)
         {
-            super(cause, id, dependencies);
+            super(cause, null, null);
             this.message = message;
+            this.instance = instance;
+        }
+
+        @Override
+        public KeletonInstance getInstance()
+        {
+            return instance;
         }
 
         @Override
@@ -116,6 +122,8 @@ abstract class LoaderEventImpl implements KeletonLoaderEvent {
         {
             return message;
         }
+
+        private final KeletonInstance instance;
 
         private final String message;
     }

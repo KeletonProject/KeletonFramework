@@ -1,7 +1,6 @@
 package org.kucro3.keleton.module.loader;
 
 import org.kucro3.keleton.exception.KeletonException;
-import org.kucro3.keleton.module.KeletonModule;
 import org.kucro3.keleton.module.exception.KeletonLoaderException;
 import org.kucro3.keleton.module.exception.KeletonModuleException;
 import org.kucro3.keleton.module.exception.KeletonModuleFunctionException;
@@ -20,7 +19,8 @@ public class ModuleSequence {
             impl.bind(this);
             impl.callback = this::checkDependedAndRemove;
 
-            this.modules.put(impl.getId(), impl);
+            if(this.modules.put(impl.getId(), impl) != null)
+                throw new KeletonLoaderException("Duplicated module: " + impl.getId());
 
             Set<String> deps = impl.getDependencies();
             this.dependencies.put(impl.getId(), deps);
