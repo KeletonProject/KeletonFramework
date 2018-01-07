@@ -22,9 +22,9 @@ public final class APIManager {
         return getNamespaces().containsKey(name);
     }
 
-    @ImportAPI(namespace = "kernel", name = "GetNamespaces")
+    @ImportAPI(namespace = "kernel-api", name = "GetNamespaces")
     public static native Map<String, APIMethodNamespace> getNamespaces();
 
-    @ImportAPI(namespace = "kernel", name = "ExportAPI")
-    public static native void export(String namespace, Class<?> apiProvider) throws APIExportingException;
+    @ImportAPI(namespace = "kernel-api", name = "ExportAPI")
+    public static native void export(Class<?> apiProvider) throws APIExportingException;
 }
