@@ -2,7 +2,6 @@ package org.kucro3.keleton;
 
 import org.kucro3.keleton.module.KeletonModule;
 import org.kucro3.keleton.module.KeletonModuleManager;
-import org.kucro3.keleton.module.loader.KeletonModuleManagerImpl;
 
 /**
  * 由此获取一些关于Keleton框架的基本信息
