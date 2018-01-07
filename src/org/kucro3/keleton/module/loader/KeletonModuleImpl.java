@@ -87,18 +87,20 @@ public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObje
         return Collections.unmodifiableSet(fenceObjects);
     }
 
-    synchronized boolean enterFence0(FenceEstablisher establisher, FenceObject object)
+    boolean enterFence0(FenceEstablisher establisher, FenceObject object)
     {
-        if(this.currentEstablisher == null && this.state.equals(State.FENCED))
-            return false; // fenced by self
-
-        if(this.currentEstablisher != null && establisher != this.currentEstablisher)
-            this.currentEstablisher.compete(this, establisher, object);
-
-        if(this.currentEstablisher != null && establisher != this.currentEstablisher)
-            return false;
-
         synchronized(state) {
+            if(this.currentEstablisher == null && this.state.equals(State.FENCED))
+                return false; // fenced by self
+
+            if(this.currentEstablisher != null && establisher != this.currentEstablisher)
+                this.currentEstablisher.compete(this, establisher, object);
+
+            if(this.currentEstablisher != null && establisher != this.currentEstablisher)
+                return false;
+
+            currentEstablisher = establisher;
+
             if (fencedState != null)
                 throw new IllegalStateException("null last state");
 
@@ -109,30 +111,31 @@ public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObje
         }
     }
 
-    synchronized boolean exitFence0(FenceEstablisher establisher, FenceObject object)
+    boolean exitFence0(FenceEstablisher establisher, FenceObject object)
     {
-        if(this.currentEstablisher == null)
-            throw new IllegalStateException("Not in established fence");
+        synchronized(state) {
+            if (this.currentEstablisher == null)
+                throw new IllegalStateException("Not in established fence");
 
-        if(this.currentEstablisher != establisher)
-            return false;
+            if (this.currentEstablisher != establisher)
+                return false;
 
-        if (fencedState == null)
-            throw new IllegalStateException("null last state");
+            if (fencedState == null)
+                throw new IllegalStateException("null last state");
 
-        boolean result = fenceObjects.remove(object);
+            boolean result = fenceObjects.remove(object);
 
-        if(fenceObjects.isEmpty())
-        {
-            currentEstablisher = null;
+            if (fenceObjects.isEmpty()) {
+                currentEstablisher = null;
 
-            State state = fencedState;
-            fencedState = null;
+                State state = fencedState;
+                fencedState = null;
 
-            this.state = state;
+                this.state = state;
+            }
+
+            return result;
         }
-
-        return result;
     }
 
     Void tryRecovery(Throwable exception, State expected)
@@ -216,11 +219,6 @@ public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObje
             }
 
         return true;
-    }
-
-    private void releaseSelf()
-    {
-        exitFence(Keleton.getKeletonEstablisher(), this);
     }
 
     private Optional<CompletableFuture<Void>> transform(State to, ActionFunction function, Supplier<Boolean> checker, boolean wait)

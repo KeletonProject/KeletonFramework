@@ -3,6 +3,7 @@ package org.kucro3.keleton.module;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -44,6 +45,20 @@ public interface KeletonModule {
     public boolean enterFence(FenceEstablisher establisher, FenceObject object);
 
     public boolean exitFence(FenceEstablisher establisher, FenceObject object);
+
+    public default boolean exitFences(FenceEstablisher establisher)
+    {
+        synchronized (getState()) {
+            if (establisher != getCurrentEstablisher())
+                return false;
+
+            Set<FenceObject> objects = new HashSet<>(getCurrentFences());
+            for (FenceObject object : objects)
+                exitFence(establisher, object);
+
+            return true;
+        }
+    }
 
     public FenceEstablisher getCurrentEstablisher();
 
