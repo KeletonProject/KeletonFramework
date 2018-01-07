@@ -18,34 +18,18 @@ public class Keleton {
 	 * @return 主版本号
 	 */
 	@ImportAPI(namespace = "kernel", name = "GetMajorVersion")
-	public static int getMajorVersion()
-	{
-		return 1;
-	}
+	public static native int getMajorVersion();
 	
 	/**
 	 * 获取Keleton框架的次版本号
 	 * @return 次版本号
 	 */
 	@ImportAPI(namespace = "kernel", name = "GetMinorVersion")
-	public static int getMinorVersion()
-	{
-		return 0;
-	}
+	public static native int getMinorVersion();
 
 	@ImportAPI(namespace = "kernel", name = "GetModuleManager")
-	public static KeletonModuleManager getModuleManager()
-	{
-		return manager;
-	}
+	public static native KeletonModuleManager getModuleManager();
 
 	@ImportAPI(namespace = "kernel", name = "GetKernelFenceEstablisher")
-	public static KeletonModule.FenceEstablisher getKeletonEstablisher()
-	{
-		return ESTABLISHER;
-	}
-
-	private static final KeletonModule.FenceEstablisher ESTABLISHER = () -> "keletonkernel";
-
-	static KeletonModuleManager manager;
+	public static native KeletonModule.FenceEstablisher getKeletonEstablisher();
 }
