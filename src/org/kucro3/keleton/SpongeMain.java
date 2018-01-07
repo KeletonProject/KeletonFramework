@@ -3,6 +3,7 @@ package org.kucro3.keleton;
 import com.google.inject.Inject;
 import org.kucro3.keleton.module.KeletonInstance;
 import org.kucro3.keleton.module.Module;
+import org.kucro3.keleton.module.loader.KeletonModuleManagerImpl;
 import org.slf4j.Logger;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
@@ -24,7 +25,7 @@ public class SpongeMain implements KeletonInstance {
     @Listener
     public void onLoad(GamePreInitializationEvent event)
     {
-
+        Keleton.manager = new KeletonModuleManagerImpl();
     }
 
     public Logger getLogger()

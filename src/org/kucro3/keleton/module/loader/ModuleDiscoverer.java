@@ -10,8 +10,8 @@ import org.spongepowered.api.plugin.PluginContainer;
 
 import java.util.*;
 
-final class KeletonModuleDiscoverer {
-    private KeletonModuleDiscoverer()
+final class ModuleDiscoverer {
+    private ModuleDiscoverer()
     {
     }
 
