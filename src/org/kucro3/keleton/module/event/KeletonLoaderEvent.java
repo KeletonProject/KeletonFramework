@@ -22,7 +22,7 @@ public interface KeletonLoaderEvent extends ProceduralEvent {
         public String getMessage();
     }
 
-    public interface Cancelled extends KeletonLoaderEvent, ProceduralEvent.Failed
+    public interface Cancelled extends KeletonLoaderEvent, ProceduralEvent.Cancelled
     {
         public String getId();
 

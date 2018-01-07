@@ -12,4 +12,8 @@ public interface ProceduralEvent extends org.spongepowered.api.event.Event {
 	public interface Pre extends ProceduralEvent
 	{
 	}
+
+	public interface Cancelled extends ProceduralEvent
+	{
+	}
 }

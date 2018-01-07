@@ -21,4 +21,8 @@ public interface HomeTeleportEvent extends HomeEvent {
 	public interface Failed extends HomeTeleportEvent, HomeEvent.Failed
 	{
 	}
+
+	public interface Cancelled extends HomeTeleportEvent, HomeEvent.Cancelled
+	{
+	}
 }

@@ -17,7 +17,7 @@ public interface KeletonModuleEvent extends ProceduralEvent {
         {
         }
 
-        public interface Cancelled extends StateTransformation, ProceduralEvent.Failed
+        public interface Cancelled extends StateTransformation, ProceduralEvent.Cancelled
         {
         }
 
@@ -49,7 +49,7 @@ public interface KeletonModuleEvent extends ProceduralEvent {
         {
         }
 
-        public interface Cancelled extends Recovery, ProceduralEvent.Failed
+        public interface Cancelled extends Recovery, ProceduralEvent.Cancelled
         {
         }
 

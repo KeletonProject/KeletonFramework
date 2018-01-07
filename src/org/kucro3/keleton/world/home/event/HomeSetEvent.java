@@ -15,4 +15,8 @@ public interface HomeSetEvent extends HomeEvent {
 	{
 		public Home getHome();
 	}
+
+	public interface Cancelled extends HomeSetEvent, HomeEvent.Cancelled
+	{
+	}
 }

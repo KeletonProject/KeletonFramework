@@ -12,15 +12,19 @@ public interface HomeEvent extends ProceduralEvent {
 	
 	public Location<World> getLocation();
 	
-	public interface Pre extends HomeEvent, CancellableWithCause
+	public interface Pre extends HomeEvent, CancellableWithCause, ProceduralEvent.Pre
 	{
 	}
 	
-	public interface Completed extends HomeEvent
+	public interface Completed extends HomeEvent, ProceduralEvent.Completed
 	{
 	}
 	
-	public interface Failed extends HomeEvent
+	public interface Failed extends HomeEvent, ProceduralEvent.Failed
+	{
+	}
+
+	public interface Cancelled extends HomeEvent, ProceduralEvent.Cancelled
 	{
 	}
 }

@@ -15,4 +15,8 @@ public interface HomeDeleteEvent extends HomeEvent {
 	public interface Failed extends HomeDeleteEvent, HomeEvent.Failed
 	{
 	}
+
+	public interface Cancelled extends HomeDeleteEvent, HomeEvent.Cancelled
+	{
+	}
 }
