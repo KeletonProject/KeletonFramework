@@ -15,4 +15,6 @@ public interface APIMethodNamespace {
     }
 
     public Map<String, APIMethodHandle> getExported();
+
+    public String getName();
 }

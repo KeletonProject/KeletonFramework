@@ -1,5 +1,7 @@
 package org.kucro3.keleton.api;
 
+import org.kucro3.keleton.api.exception.APIExportingException;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,4 +24,7 @@ public final class APIManager {
 
     @ImportAPI(namespace = "kernel", name = "GetNamespaces")
     public static native Map<String, APIMethodNamespace> getNamespaces();
+
+    @ImportAPI(namespace = "kernel", name = "ExportAPI")
+    public static native void export(String namespace, Class<?> apiProvider) throws APIExportingException;
 }
