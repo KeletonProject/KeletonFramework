@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObject {
+public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObject, KeletonModule.FenceEstablisher {
     KeletonModuleImpl(KeletonInstance instance, Module info)
     {
         this.instance = instance;
@@ -89,6 +89,9 @@ public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObje
 
     boolean enterFence0(FenceEstablisher establisher, FenceObject object)
     {
+        Objects.requireNonNull(establisher);
+        Objects.requireNonNull(object);
+
         synchronized(state) {
             if(this.currentEstablisher == null && this.state.equals(State.FENCED))
                 return false; // fenced by self
@@ -113,6 +116,9 @@ public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObje
 
     boolean exitFence0(FenceEstablisher establisher, FenceObject object)
     {
+        Objects.requireNonNull(establisher);
+        Objects.requireNonNull(object);
+
         synchronized(state) {
             if (this.currentEstablisher == null)
                 throw new IllegalStateException("Not in established fence");
@@ -173,7 +179,10 @@ public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObje
 
     void transformed(State to)
     {
-        this.state = to;
+        synchronized (state) {
+            exitFence(this, this);
+            this.state = to;
+        }
         postTransformed(to);
     }
 
@@ -226,7 +235,11 @@ public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObje
         if(!checkBind() || !checker.get() || !checkConvert(to) || !prepostTransformation(to))
             return Optional.empty();
 
-        fence();
+        boolean result;
+        while(!(result = enterFence(this, this)) && wait);
+
+        if(!result)
+            return Optional.empty();
 
         try {
             if(!queueDependencies(wait))
@@ -484,7 +497,13 @@ public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObje
     @Override
     public String getFenceObjectName()
     {
-        return "Module:" + getId();
+        return getId();
+    }
+
+    @Override
+    public String getFenceEstablisherName()
+    {
+        return getId();
     }
 
     DisablingCallback callback;
@@ -502,6 +521,8 @@ public class KeletonModuleImpl implements KeletonModule, KeletonModule.FenceObje
     private final KeletonInstance instance;
 
     private final Module info;
+
+
 
     static interface DisablingCallback
     {
