@@ -4,6 +4,8 @@ import org.kucro3.keleton.api.APIContainer;
 import org.kucro3.keleton.api.ImportAPI;
 import org.kucro3.keleton.module.KeletonModule;
 import org.kucro3.keleton.module.KeletonModuleManager;
+import org.kucro3.klink.Environment;
+import org.kucro3.klink.Klink;
 
 /**
  * 由此获取一些关于Keleton框架的基本信息
@@ -32,4 +34,10 @@ public class Keleton {
 
 	@ImportAPI(namespace = "kernel", name = "GetKernelFenceEstablisher")
 	public static native KeletonModule.FenceEstablisher getKeletonEstablisher();
+
+	@ImportAPI(namespace = "kernel", name = "GetKernelKlinkInstance")
+	public static native Klink getKlink();
+
+	@ImportAPI(namespace = "kernel", name = "GetKernelKlinkEnvironment")
+	public static native Environment getKlinkEnvironment();
 }
