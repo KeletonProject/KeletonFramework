@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
 public @interface Module {
     public String id();
 
+    public String name() default "";
+
     public String[] dependencies() default {};
 
     public boolean supportDisabling() default false;
