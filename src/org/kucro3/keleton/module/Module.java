@@ -13,4 +13,10 @@ public @interface Module {
     public String[] dependencies() default {};
 
     public boolean supportDisabling() default false;
+
+    public String version() default "";
+
+    public String description() default "";
+
+    public String[] authors() default {};
 }
