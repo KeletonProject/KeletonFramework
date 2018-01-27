@@ -3,6 +3,7 @@ package org.kucro3.keleton.emulated;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.Optional;
 
 public interface EmulatedHandle {
@@ -19,6 +20,8 @@ public interface EmulatedHandle {
     public String getName();
 
     public String getPath();
+
+    public URL toURL();
 
     public default Optional<String> getParent()
     {
