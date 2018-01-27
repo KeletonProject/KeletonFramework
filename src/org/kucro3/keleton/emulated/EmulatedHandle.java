@@ -21,7 +21,7 @@ public interface EmulatedHandle {
 
     public String getPath();
 
-    public URL toURL();
+    public URL toURL() throws IOException;
 
     public default Optional<String> getParent()
     {
