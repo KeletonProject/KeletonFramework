@@ -4,6 +4,10 @@ import org.kucro3.keleton.emulated.EmulatedHandle;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -21,6 +25,31 @@ public interface KeletonModule {
     public State getState();
 
     public EmulatedHandle getSource();
+
+    public URL getResourceURL();
+
+    public default Optional<InputStream> getResource(String path) throws IOException
+    {
+        URL url = getResourceURL();
+        url = new URL(url, path);
+
+        URLConnection connection = url.openConnection();
+
+        if(connection == null)
+            return Optional.empty();
+
+        connection.connect();
+        return Optional.of(connection.getInputStream());
+    }
+
+    public default Optional<InputStream> getResourceSilently(String path)
+    {
+        try {
+            return getResource(path);
+        } catch (IOException e) {
+            return Optional.empty();
+        }
+    }
 
     public Optional<CompletableFuture<Void>> loadImmediately();
 
