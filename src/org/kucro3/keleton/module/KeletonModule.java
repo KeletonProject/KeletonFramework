@@ -1,5 +1,6 @@
 package org.kucro3.keleton.module;
 
+import org.kucro3.keleton.emulated.EmulatedHandle;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 
@@ -18,6 +19,8 @@ public interface KeletonModule {
     public boolean supportDisabling();
 
     public State getState();
+
+    public EmulatedHandle getSource();
 
     public Optional<CompletableFuture<Void>> loadImmediately();
 
