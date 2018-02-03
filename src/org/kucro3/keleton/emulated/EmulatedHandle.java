@@ -52,7 +52,7 @@ public interface EmulatedHandle {
 
     public Optional<OutputStream> openOutput() throws IOException;
 
-    public void create() throws IOException;
+    public boolean create() throws IOException;
 
     public static interface HandleFilter
     {
