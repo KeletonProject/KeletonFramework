@@ -23,6 +23,8 @@ public interface EmulatedHandle {
 
     public URL toURL() throws IOException;
 
+    public Optional<EmulatedHandle> subHandle(String path);
+
     public default Optional<String> getParent()
     {
         Optional<EmulatedHandle> optional = getParentHandle();
