@@ -1,9 +1,9 @@
 package org.kucro3.keleton.klink.xmount;
 
-import org.kucro3.klink.Klink;
+import org.kucro3.klink.expression.ExpressionLibrary;
 
 public interface Mounter {
-    public void mount(Klink sys);
+    public void mount(ExpressionLibrary lib);
 
-    public void unmount(Klink sys);
+    public void unmount(ExpressionLibrary lib);
 }
