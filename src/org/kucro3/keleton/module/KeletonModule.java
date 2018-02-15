@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 public interface KeletonModule {
     public String getId();
@@ -51,50 +49,13 @@ public interface KeletonModule {
         }
     }
 
-    public Optional<CompletableFuture<Void>> loadImmediately();
+    public boolean load();
 
-    public Optional<CompletableFuture<Void>> load();
+    public boolean enable();
 
-    public Optional<CompletableFuture<Void>> enableImmediately();
+    public boolean disable();
 
-    public Optional<CompletableFuture<Void>> enable();
-
-    public Optional<CompletableFuture<Void>> disableImmediately();
-
-    public Optional<CompletableFuture<Void>> disable();
-
-    public Optional<CompletableFuture<Void>> destroyImmediately();
-
-    public Optional<CompletableFuture<Void>> destroy();
-
-    public boolean waitForDependencies();
-
-    public default void escapeFence()
-    {
-        escapeState(State.FENCED);
-    }
-
-    public boolean enterFence(FenceEstablisher establisher, FenceObject object);
-
-    public boolean exitFence(FenceEstablisher establisher, FenceObject object);
-
-    public default boolean exitFences(FenceEstablisher establisher)
-    {
-        synchronized (getState()) {
-            if (establisher != getCurrentEstablisher())
-                return false;
-
-            Set<FenceObject> objects = new HashSet<>(getCurrentFences());
-            for (FenceObject object : objects)
-                exitFence(establisher, object);
-
-            return true;
-        }
-    }
-
-    public FenceEstablisher getCurrentEstablisher();
-
-    public Set<FenceObject> getCurrentFences();
+    public boolean destroy();
 
     public void escapeState(State state);
 
@@ -104,8 +65,7 @@ public interface KeletonModule {
         ENABLED(0x02),
         DISABLED(0x04),
         DESTROYED(0x08),
-        FENCED(0x10),
-        FAILED(0x20);
+        FAILED(0x10);
 
         private State(int code)
         {
@@ -118,24 +78,5 @@ public interface KeletonModule {
         }
 
         private final int code;
-    }
-
-    public static interface FenceEstablisher
-    {
-        public String getFenceEstablisherName();
-
-        public default void compete(KeletonModule module, FenceEstablisher establisher, FenceObject object)
-        {
-        }
-
-        public default Optional<PluginContainer> getPlugin()
-        {
-            return Sponge.getPluginManager().getPlugin(getFenceEstablisherName());
-        }
-    }
-
-    public static interface FenceObject
-    {
-        public String getFenceObjectName();
     }
 }

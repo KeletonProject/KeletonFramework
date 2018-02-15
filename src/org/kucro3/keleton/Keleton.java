@@ -32,9 +32,6 @@ public class Keleton {
 	@ImportAPI(namespace = "kernel", name = "GetModuleManager")
 	public static native KeletonModuleManager getModuleManager();
 
-	@ImportAPI(namespace = "kernel", name = "GetKernelFenceEstablisher")
-	public static native KeletonModule.FenceEstablisher getKeletonEstablisher();
-
 	@ImportAPI(namespace = "kernel", name = "GetKernelKlinkInstance")
 	public static native Klink getKlink();
 
