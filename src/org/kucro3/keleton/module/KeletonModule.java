@@ -1,8 +1,6 @@
 package org.kucro3.keleton.module;
 
 import org.kucro3.keleton.emulated.EmulatedHandle;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.io.InputStream;
