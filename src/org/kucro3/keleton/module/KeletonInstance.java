@@ -10,6 +10,4 @@ public interface KeletonInstance {
     public default CompletableFuture<Void> onDisable() throws Exception {return CompletableFuture.completedFuture(null);}
 
     public default CompletableFuture<Void> onDestroy() throws Exception {return CompletableFuture.completedFuture(null);}
-
-    public default boolean tryRecovery(KeletonModule module, KeletonModule.State expectedState, Throwable e) {return false;}
 }
