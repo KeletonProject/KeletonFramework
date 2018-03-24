@@ -3,6 +3,7 @@ package org.kucro3.keleton.security;
 import org.kucro3.keleton.api.APIContainer;
 import org.kucro3.keleton.api.ImportAPI;
 
+import java.security.AccessController;
 import java.security.Permission;
 
 @APIContainer
