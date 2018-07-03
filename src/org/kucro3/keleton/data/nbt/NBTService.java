@@ -100,6 +100,8 @@ public class NBTService {
 			put(NBTTagLong.class, NBTTagLong.TYPENAME);
 			put(NBTTagShort.class, NBTTagShort.TYPENAME);
 			put(NBTTagString.class, NBTTagString.TYPENAME);
+			put(NBTTagIntArray.class, NBTTagIntArray.TYPENAME);
+			put(NBTTagLongArray.class, NBTTagLongArray.TYPENAME);
 			
 			put(NBTTagByte.TYPENAME, NBTTagByte.class);
 			put(NBTTagByteArray.TYPENAME, NBTTagByteArray.class);
@@ -111,6 +113,8 @@ public class NBTService {
 			put(NBTTagLong.TYPENAME, NBTTagLong.class);
 			put(NBTTagShort.TYPENAME, NBTTagShort.class);
 			put(NBTTagString.TYPENAME, NBTTagString.class);
+			put(NBTTagIntArray.TYPENAME, NBTTagIntArray.class);
+			put(NBTTagLongArray.TYPENAME, NBTTagLongArray.class);
 		}
 	};
 	
@@ -133,6 +137,8 @@ public class NBTService {
 			put(NBTTagLong.class, NBTTagLong.TYPECODE);
 			put(NBTTagShort.class, NBTTagShort.TYPECODE);
 			put(NBTTagString.class, NBTTagString.TYPECODE);
+			put(NBTTagIntArray.class, NBTTagIntArray.TYPECODE);
+			put(NBTTagLongArray.class, NBTTagLongArray.TYPECODE);
 			
 			put(NBTTagByte.TYPECODE, NBTTagByte.class);
 			put(NBTTagByteArray.TYPECODE, NBTTagByteArray.class);
@@ -144,6 +150,8 @@ public class NBTService {
 			put(NBTTagLong.TYPECODE, NBTTagLong.class);
 			put(NBTTagShort.TYPECODE, NBTTagShort.class);
 			put(NBTTagString.TYPECODE, NBTTagString.class);
+			put(NBTTagIntArray.TYPECODE, NBTTagIntArray.class);
+			put(NBTTagLongArray.TYPECODE, NBTTagLongArray.class);
 		}
 	};
 	
@@ -166,6 +174,8 @@ public class NBTService {
 			put(NBTTagLong.class, NBTTagLong::new);
 			put(NBTTagShort.class, NBTTagShort::new);
 			put(NBTTagString.class, NBTTagString::new);
+			put(NBTTagIntArray.class, NBTTagIntArray::new);
+			put(NBTTagLongArray.class, NBTTagLongArray::new);
 		}
 	};
 }

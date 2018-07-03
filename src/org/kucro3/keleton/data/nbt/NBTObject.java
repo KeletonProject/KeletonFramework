@@ -47,7 +47,8 @@ public abstract class NBTObject {
 	
 	protected static String readString(DataInput input) throws IOException
 	{
-		byte[] byts = new byte[input.readShort()];
+		int size = input.readShort();
+		byte[] byts = new byte[size];
 		input.readFully(byts);
 		return new String(byts, CHARSET);
 	}
