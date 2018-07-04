@@ -15,6 +15,10 @@ import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class NBTService {
+	private NBTService()
+	{
+	}
+
 	public static String getTypeName(Class<? extends NBTObject> clz)
 	{
 		return (String) MAPPED_NAMES.get(clz);
